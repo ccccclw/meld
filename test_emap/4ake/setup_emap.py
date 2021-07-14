@@ -73,7 +73,7 @@ def setup_system():
 #    n_ss_keep = int(len(ss_rests) * 0.8) #We enforce 100% of restrains 
 #    s.restraints.add_selectively_active_collection(ss_rests, n_ss_keep)
     
-    map_file=mrcfile.open('4ake_t_2A.mrc')
+    map_file=mrcfile.open('4ake_t_5A.mrc')
     map_pot = map_potential(map_file.data,0.25,0.3) 
     map_origin = [float(i)/10 for i in map_file.header['origin'].item()]
     map_origin = [float(i) - np.average(md.load_pdb('1ake_leap.pdb').xyz.T,axis=1)[index] for index,i in enumerate(map_origin)]
