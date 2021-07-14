@@ -1,8 +1,0 @@
-/home/liweichang/program/OpenMM/bin_cuda10_dev/include/MeldForce.h
-/home/liweichang/program/OpenMM/bin_cuda10_dev/include/MeldKernels.h
-/home/liweichang/program/OpenMM/bin_cuda10_dev/include/internal/MeldForceImpl.h
-/home/liweichang/program/OpenMM/bin_cuda10_dev/include/internal/windowsExportMeld.h
-/home/liweichang/program/OpenMM/bin_cuda10_dev/lib/libMeldPlugin.so
-/home/liweichang/program/OpenMM/bin_cuda10_dev/lib/plugins/libMeldPluginReference.so
-/home/liweichang/program/OpenMM/bin_cuda10_dev/lib/plugins/libMeldPluginCUDA.so
-/home/liweichang/program/OpenMM/bin_cuda10_dev/docs/C++ API Reference.html
