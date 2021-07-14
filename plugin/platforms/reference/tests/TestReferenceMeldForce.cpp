@@ -778,6 +778,63 @@ void testGMMRest3Pair2Component() {
     ASSERT_EQUAL_VEC(expectedForce4, state.getForces()[3], 1e-4);
 }
 
+void testEmapRest() {
+    const int numParticles = 1;
+    System system;
+    vector<Vec3> positions(numParticles);
+    system.addParticle(1.0);
+
+    MeldForce* force = new MeldForce();
+    int nGrids = 8;
+    std::vector<double> mu(nGrids);
+    std::vector<double> blur(nGrids);
+    std::vector<double> bandwidth(nGrids);
+    std::vector<double> grid_x(nGrids);
+    std::vector<double> grid_y(nGrids);
+    std::vector<double> grid_z(nGrids);
+    mu[0] = 0.4; mu[1] = 0.4; mu[2] = 0.4; mu[3] = 0.4; mu[4] = 0.4; mu[5] = 0.4; mu[6] = 0.4; mu[7] = 0.0; 
+    for(int i=0; i<mu.size(); i++) { blur[i]=0; };
+    for(int i=0; i<mu.size(); i++) { bandwidth[i]=0.5; };
+    grid_x[0] = 0; grid_x[1] = 0; grid_x[2] = 1; grid_x[3] = 1; grid_x[4] = 0; grid_x[5] = 0; grid_x[6] = 1; grid_x[7] = 1; 
+    grid_y[0] = 0; grid_y[1] = 1; grid_y[2] = 0; grid_y[3] = 1; grid_y[4] = 0; grid_y[5] = 1; grid_y[6] = 0; grid_y[7] = 1; 
+    grid_z[0] = 0; grid_z[1] = 0; grid_z[2] = 0; grid_z[3] = 0; grid_z[4] = 1; grid_z[5] = 1; grid_z[6] = 1; grid_z[7] = 1; 
+    
+    
+    int restIdx = force->addEmapRestraint(0,mu,blur,bandwidth,grid_x,grid_y,grid_z);
+    std::vector<int> restIndices(1);
+    restIndices[0] = restIdx;
+    int groupIdx = force->addGroup(restIndices, 1);
+    std::vector<int> groupIndices(1);
+    groupIndices[0] = groupIdx;
+    force->addCollection(groupIndices, 1);
+    system.addForce(force);
+
+    VerletIntegrator integ(1.0);
+    Platform& platform = Platform::getPlatformByName("Reference");
+    Context context(system, integ, platform);
+    for(float a=1; a<100; a++)
+    {
+        for(float b=1; b<100; b++)
+        {
+            for(float c=1; c<100; c++)
+            {
+                positions[0] = Vec3(a/100, b/100, c/100);
+                context.setPositions(positions);
+                State stateI = context.getState(State::Energy | State::Forces);
+                cout << "pos: " << positions[0] << endl;
+                // cout << "emapE: " << stateI.getPotentialEnergy() << endl;
+                // cout << "emapF: " << stateI.getForces()[0] << endl;
+            };
+        };
+    };
+    // positions[0] = Vec3(0.3, 0.4, 0.5);
+    // context.setPositions(positions);
+    // State stateI = context.getState(State::Energy | State::Forces);
+    // cout << "emapE: " << stateI.getPotentialEnergy() << endl;
+    // cout << "emapF: " << stateI.getForces()[0] << endl;
+
+
+}
 
 void testGroupSelectsCorrectly() {
     // setup system
@@ -1140,6 +1197,7 @@ int main(int argc, char* argv[]) {
         // testGMMRest1Pair2Component();
         // testGMMRest2Pair2Component();
         // testGMMRest3Pair2Component();
+        testEmapRest();
         testGroupSelectsCorrectly();
         testCollectionSelectsCorrectly();
         testSingleGroup();

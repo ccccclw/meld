@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <list>
 
 using namespace OpenMM;
 using namespace std;
@@ -280,6 +281,64 @@ void computeGMMRest(
     throw OpenMMException("GMM restraints not implemented for Reference platform.");
 }
 
+void computeEmapRest(
+    vector<RealVec> &pos,
+    vector<int> &atomIndices,
+    vector<float3> &grids,
+    vector<float> &mu,
+    vector<float> &blur,
+    vector<float> &bandwidth,
+    vector<float> &emap_weights,
+    vector<float> &energies,
+    vector<int> &indexToGlobal,
+    vector<float3> &forceBuffer,
+    int numRestraints)
+{
+    for (int index = 0; index < numRestraints ; index++)
+    {
+        // get my global index
+        const int globalIndex = indexToGlobal[index];
+        int atomIndex = atomIndices[index];
+        int numGrids = grids.size();
+        float emap_weight = emap_weights[index];
+        //compute force and energy
+        float energy = 0.0;
+        float dEdR = 0.0;
+        RealVec f = RealVec(0.0,0.0,0.0);
+        int tmp_index;
+        float tmp_distance = 100.0 ;
+        vector< pair <float,int> > sort_near_grid;
+        for (int grid_index = 0; grid_index < numGrids; grid_index++)
+        {
+            RealVec diff = pos[atomIndex] - Float3ToVec3(grids[grid_index]);
+            float3 grids_tmp = grids[grid_index];
+            float diffSquared = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
+            float r = SQRT(diffSquared);
+            sort_near_grid.push_back(make_pair(r, grid_index));
+            if ((mu[grid_index] - 0.3) < -0.001 && r <= tmp_distance){
+                tmp_index = grid_index;
+                tmp_distance = r;
+            }
+            float blurred = bandwidth[grid_index] * bandwidth[grid_index] + (1-blur[grid_index]) * (1-blur[grid_index]);
+            energy += emap_weight * mu[grid_index] * exp(-1 * diffSquared / (2 * blurred));
+            // cout << "tmp_energy: " <<  energy << endl;
+            if (r > 0) {
+                // dEdR = mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * r;
+                f += emap_weight * mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * diff;
+                // f += RealVec(diff[0] * dEdR / r, diff[1] * dEdR / r, diff[2] * dEdR / r);
+                // cout << "checktmp_F: " <<  f << endl;
+            }
+        
+        }
+        cout << "blur: " <<  blur[0] << endl;
+        forceBuffer[index] = RealVecToFloat3(f);
+        energies[index] = energy;
+        cout << "fenergy: " <<  energy << endl;
+        cout << "fforce: " <<  f << endl;
+    }
+    cout << "---------------------" << endl;
+}
+
 void evaluateAndActivate(
     int numGroups,
     vector<int> &groupNumActive,
@@ -500,4 +559,29 @@ float applyGMMRest(
     vector<float3> &gmmForces)
 {
     throw OpenMMException("GMM restraints not implemented for Reference platform.");
+}
+
+float applyEmapRest(
+    vector<RealVec> &force,
+    vector<int> &emapRestAtomIndices,
+    vector<int> &emapRestGlobalIndices,
+    vector<float3> &emapRestForces,
+    vector<float> &restraintEnergies,
+    int numEmapRestraints)
+{
+    float totalEnergy = 0.0;
+    for (int i = 0; i < numEmapRestraints; i++)
+    {   
+        auto index = emapRestGlobalIndices[i];
+        float E_tmp = restraintEnergies[index];
+        // cout << "applyE: " << E_tmp << endl;
+        // cout << "applyF: " << Float3ToVec3(emapRestForces[index]) << endl;
+        totalEnergy += restraintEnergies[index];
+        auto fx = get<0>(emapRestForces[i]);
+        auto fy = get<1>(emapRestForces[i]);
+        auto fz = get<2>(emapRestForces[i]);
+        auto atom = emapRestAtomIndices[i];
+        force[atom] += Vec3(fx, fy, fz);
+    }
+    return totalEnergy;
 }

@@ -43,6 +43,7 @@ from meld.system.restraints import (
     AbsoluteCOMRestraint,
     RdcRestraint,
     HyperbolicDistanceRestraint,
+    EmapRestraint
 )
 from meld.system.openmm_runner import cmap
 from meld.system.openmm_runner import transform
@@ -328,7 +329,7 @@ class OpenMMRunner(ReplicaRunner):
 
         # set the positions
         self._simulation.context.setPositions(coordinates)
-
+        #logger.info(f"coordinate: {coordinates}")
         # if explicit solvent, then set the box vectors
         if self._options.solvation == "explicit":
             self._simulation.context.setPeriodicBoxVectors(

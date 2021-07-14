@@ -137,7 +137,7 @@ References
 import math
 import numpy as np  # type: ignore
 from collections import namedtuple
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 STRENGTH_AT_ALPHA_MAX = 1e-3  # default strength of restraints at alpha=1.0
@@ -1102,6 +1102,31 @@ class COMRestraint(NonSelectableRestraint):
             count = self.dims.count(dim)
             if count > 1:
                 raise ValueError(f"{dim} occurs more than once in dims")
+
+class EmapRestraint(SelectableRestraint):
+    """
+    Restraint derived from density map.
+    """
+
+    _restraint_key_ = "emap"
+
+    def __init__(
+        self,
+        system,
+        scaler,
+        ramp,
+        atom_res_index,
+        atom_name,
+        mu: np.ndarray,
+        bandwidth: np.ndarray,
+        gridpos: np.ndarray
+    ):
+        self.atom_index = [system.index_of_atom(atom_res_index[i], atom_name[i]) for i in range(len(atom_res_index))]
+        self.scaler = ConstantScaler() if scaler is None else scaler
+        self.ramp = ConstantRamp() if ramp is None else ramp
+        self.mu = mu
+        self.bandwidth = bandwidth
+        self.gridpos = gridpos
 
 
 class AlwaysActiveCollection:

@@ -4,6 +4,7 @@
 using namespace OpenMM;
 using namespace std;
 
+
 void computeDistRest(
     vector<RealVec> &pos,
     vector<int2> &distanceRestAtomIndices,
@@ -71,6 +72,19 @@ void computeGMMRest(
     vector<float> &gmmData,
     vector<float> &restraintEnergies,
     vector<float3> &gmmForces);
+
+void computeEmapRest(
+    vector<RealVec> &pos,
+    vector<int> &atomIndices,
+    vector<float3> &grids,
+    vector<float> &mu,
+    vector<float> &blur,
+    vector<float> &bandwidth,
+    vector<float> &emap_weights,
+    vector<float> &energies,
+    vector<int> &indexToGlobal,
+    vector<float3> &forceBuffer,
+    int numRestraints);
 
 void evaluateAndActivate(
     int numGroups,
@@ -150,3 +164,11 @@ float applyGMMRest(
     vector<int2> &gmmOffsets,
     vector<int> &gmmAtomIndices,
     vector<float3> &gmmForces);
+
+float applyEmapRest(
+    vector<RealVec> &force,
+    vector<int> &emapRestAtomIndices,
+    vector<int> &emapRestGlobalIndices,
+    vector<float3> &emapRestForces,
+    vector<float> &restraintEnergies,
+    int numEmapRestraints);

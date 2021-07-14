@@ -53,13 +53,14 @@ private:
     int numTorsProfileRestraints;
     int numTorsProfileRestParams;
     int numGMMRestraints;
+    int numEmapRestraints;
+    int numEmapGrids;
+    int numEmapAtoms;
     int numRestraints;
     int numGroups;
     int numCollections;
     int largestGroup;
     int largestCollection;
-    int threadsPerCollection;
-    int threadsPerGroup;
     int groupsPerBlock;
     OpenMM::CudaContext& cu;
     const OpenMM::System& system;
@@ -69,6 +70,7 @@ private:
     CUfunction computeDistProfileRestKernel;
     CUfunction computeTorsProfileRestKernel;
     CUfunction computeGMMRestKernel;
+    CUfunction computeEmapRestKernel;
     CUfunction evaluateAndActivateKernel;
     CUfunction evaluateAndActivateCollectionsKernel;
     CUfunction applyGroupsKernel;
@@ -78,6 +80,7 @@ private:
     CUfunction applyDistProfileRestKernel;
     CUfunction applyTorsProfileRestKernel;
     CUfunction applyGMMRestKernel;
+    CUfunction applyEmapRestKernel;
 
     /**
      * Arrays for distance restraints
@@ -209,6 +212,32 @@ private:
     OpenMM::CudaArray* gmmForces;                   // float array to hold the forces until application
 
     /**
+     * Arrays for Emap restraints
+     */
+    OpenMM::CudaArray* emapGridPos;
+    std::vector<float3> h_emapGridPos;
+
+    OpenMM::CudaArray* emapMu;
+    std::vector<float> h_emapMu;
+
+    OpenMM::CudaArray* emapBlur;
+    std::vector<float> h_emapBlur;
+
+    OpenMM::CudaArray* emapBandwidth;
+    std::vector<float> h_emapBandwidth;
+
+    OpenMM::CudaArray* emapAtomIndices;
+    std::vector<int> h_emapAtomIndices;
+
+    OpenMM::CudaArray* emap_weights;
+    std::vector<float> h_emap_weights;
+
+    OpenMM::CudaArray* emapGlobalIndices; 
+    std::vector<int> h_emapGlobalIndices;
+
+    OpenMM::CudaArray* emapRestForces;    
+
+    /**
      * Arrays for all restraints
      *
      * Each array has size numRestraints
@@ -252,6 +281,9 @@ private:
 
     OpenMM::CudaArray* collectionEnergies;
 
+    OpenMM::CudaArray* collectionEncounteredError;   // flag that indicates that we encountered an error when processing collections
+    std::vector<int> h_collectionEncounteredError;
+
     void allocateMemory(const MeldForce& force);
     void setupDistanceRestraints(const MeldForce& force);
     void setupHyperbolicDistanceRestraints(const MeldForce& force);
@@ -259,11 +291,14 @@ private:
     void setupDistProfileRestraints(const MeldForce& force);
     void setupTorsProfileRestraints(const MeldForce& force);
     void setupGMMRestraints(const MeldForce& force);
+    void setupEmapRestraints(const MeldForce& force);
     void setupGroups(const MeldForce& force);
     void setupCollections(const MeldForce& force);
     void validateAndUpload();
     int calcSizeGMMAtomIndices(const MeldForce& force);
     int calcSizeGMMData(const MeldForce& force);
+    int calcNumGrids(const MeldForce& force);
+    int calcNumEmapAtoms(const MeldForce &force);
 };
 } // namespace MeldPlugin
 

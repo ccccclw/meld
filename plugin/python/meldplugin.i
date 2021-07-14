@@ -100,6 +100,8 @@ namespace MeldPlugin {
 
         int getNumGMMRestraints() const;
 
+        int getNumEmapRestraints() const;
+
         int getNumTotalRestraints() const;
 
         int getNumGroups() const;
@@ -258,6 +260,26 @@ namespace MeldPlugin {
         %clear std::vector<double>& precisionOnDiagonal;
         %clear std::vector<double>& precisionOffDiagonal;
 
+        %apply std::vector<int>& OUTPUT {std::vector<int>& atom};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& mu};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& blur};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& bandwidth};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& gridpos_x};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& gridpos_y};
+        %apply std::vector<double>& OUTPUT {std::vector<double>& gridpos_z};
+        %apply int& OUTPUT {int& globalIndex};
+        void getEmapRestraintParams(int index, std::vector<int>& atom, std::vector<double>& mu, std::vector<double>& blur, 
+                        std::vector<double>& bandwidth, std::vector<double>& gridpos_x,
+                        std::vector<double>& gridpos_y, std::vector<double>& gridpos_z, int& globalIndex) const;
+        %clear std::vector<int>& atom;
+        %clear std::vector<double>& mu;
+        %clear std::vector<double>& blur;
+        %clear std::vector<double>& bandwidth;
+        %clear std::vector<double>& gridpos_x;
+        %clear std::vector<double>& gridpos_y;
+        %clear std::vector<double>& gridpos_z;
+        %clear int& globalIndex;
+
         %apply std::vector<int>& OUTPUT {std::vector<int>& indices};
         %apply int& OUTPUT {int& numActive};
         void getGroupParams(int index, std::vector<int>& indices, int& numActive) const;
@@ -325,6 +347,13 @@ namespace MeldPlugin {
                                 std::vector<double> means,
                                 std::vector<double> precisionOnDiagonal,
                                 std::vector<double> precisionOffDiagonal);
+
+        int addEmapRestraint(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+                std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
+
+        
+        void modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+                std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
 
         int addGroup(std::vector<int> restraint_indices, int n_active);
 

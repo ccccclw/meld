@@ -86,6 +86,11 @@ public:
     int getNumGMMRestraints() const;
 
     /**
+     * @return The number of Emap restraints
+     */
+    int getNumEmapRestraints() const;
+    // int getNumEmapGrids() const;
+    /**
      * @return The total number of distance and torsion restraints.
      */
     int getNumTotalRestraints() const;
@@ -218,6 +223,21 @@ public:
                                std::vector<double>& precisionOnDiagonal,
                                std::vector<double>& precisionOffDiagonal,
                                int& globalIndex) const;
+
+
+    /**
+     * Get the parameters for a Emap restraint. See addEmapRestraint()
+     * for more details about the parameters.
+     * 
+     */
+    void getEmapRestraintParams(int index, std::vector<int>& atom, 
+                            std::vector<double>& mu, 
+                            std::vector<double>& blur,
+                            std::vector<double>& bandwidth,
+                            std::vector<double>& gridpos_x,
+                            std::vector<double>& gridpos_y,
+                            std::vector<double>& gridpos_z,
+                            int& globalIndex) const;
 
     /**
      * Get the parameters for a group of restraints.
@@ -531,6 +551,17 @@ public:
                             std::vector<double> precisionOffDiagonal);
 
     /**
+     * Create a new Emap restraint.
+     * 
+     */
+    int addEmapRestraint(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+        std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
+
+    void modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+        std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
+
+    
+    /**
      * Create a new group of restraints.
      *
      * @param restraint_indices  the indices of the restraints in the group
@@ -562,6 +593,7 @@ private:
     class DistProfileRestraintInfo;
     class TorsProfileRestraintInfo;
     class GMMRestraintInfo;
+    class EmapRestraintInfo;
     class GroupInfo;
     class CollectionInfo;
     int n_restraints;
@@ -571,6 +603,7 @@ private:
     std::vector<DistProfileRestraintInfo> distProfileRestraints;
     std::vector<TorsProfileRestraintInfo> torsProfileRestraints;
     std::vector<GMMRestraintInfo> gmmRestraints;
+    std::vector<EmapRestraintInfo> emapRestraints;
     std::vector<GroupInfo> groups;
     std::vector<CollectionInfo> collections;
     std::set<int> meldParticleSet;
@@ -742,7 +775,30 @@ private:
       precisionOnDiagonal(precisionOnDiagonal), atomIndices(atomIndices) {}
     };
 
+    class EmapRestraintInfo {
+    public:
+        std::vector<int> particle;
+        std::vector<double> mu;
+        std::vector<double> blur;
+        std::vector<double> bandwidth;
+        std::vector<double> gridpos_x;
+        std::vector<double> gridpos_y; 
+        std::vector<double> gridpos_z;
+        int globalIndex;
+
+        EmapRestraintInfo() {
+            // particle = -1;
+            globalIndex = -1;
+        }
+        EmapRestraintInfo(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+        std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z, int globalIndex): particle(particle),
+        mu(mu), blur(blur), bandwidth(bandwidth), gridpos_x(gridpos_x), gridpos_y(gridpos_y), gridpos_z(gridpos_z), globalIndex(globalIndex) {}
+        
+    };
+
 };
+
+
 
 } // namespace MeldPlugin
 

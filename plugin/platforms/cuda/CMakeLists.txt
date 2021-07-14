@@ -6,7 +6,7 @@
 # and make it available to the code so it can be built into the binaries.
 
 SET(MELD_CUDA_LIBRARY_NAME MeldPluginCUDA)
-
+SET(EIGEN3_INCLUDE_DIR /apps/eigen3/3.1.3/include/eigen3/)
 SET(SHARED_TARGET ${MELD_CUDA_LIBRARY_NAME})
 
 # include Eigen3

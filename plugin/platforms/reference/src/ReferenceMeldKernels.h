@@ -48,6 +48,7 @@ private:
     int numTorsProfileRestraints;
     int numTorsProfileRestParams;
     int numGMMRestraints;
+    int numEmapRestraints;
     int numRestraints;
     int numGroups;
     int numCollections;
@@ -122,6 +123,20 @@ private:
     std::vector<float3> gmmForces;
 
     /**
+     * Arrays for Emap restraints
+     * 
+     */
+    std::vector<float3> emapGridPos;
+    std::vector<float> emapMu;
+    std::vector<float> emapBlur;
+    std::vector<float> emapBandwidth;
+    std::vector<int> emapAtomIndices;
+    std::vector<float> emap_weights;
+    std::vector<float3> emapRestForces;
+    std::vector<int> emapGlobalIndices;
+    
+
+    /**
      * Arrays for all restraints
      *
      * Each array has size numRestraints
@@ -156,10 +171,12 @@ private:
     void setupDistProfileRestraints(const MeldForce& force);
     void setupTorsProfileRestraints(const MeldForce& force);
     void setupGMMRestraints(const MeldForce& force);
+    void setupEmapRestraints(const MeldForce& force);
     void setupGroups(const MeldForce& force);
     void setupCollections(const MeldForce& force);
     int calcSizeGMMAtomIndices(const MeldForce& force);
     int calcSizeGMMData(const MeldForce& force);
+    int calcNumGrids(const MeldForce& force);
 };
 }
 #endif /*MELD_OPENMM_REFERENCEKERNELS_H*/

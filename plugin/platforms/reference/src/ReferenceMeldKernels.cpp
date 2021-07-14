@@ -172,6 +172,7 @@ ReferenceCalcMeldForceKernel::ReferenceCalcMeldForceKernel(std::string name, con
     numTorsionRestraints = 0;
     numDistProfileRestraints = 0;
     numGMMRestraints = 0;
+    numEmapRestraints = 0;
     numRestraints = 0;
     numGroups = 0;
     numCollections = 0;
@@ -187,6 +188,7 @@ void ReferenceCalcMeldForceKernel::initialize(const System &system, const MeldFo
     numTorsProfileRestraints = force.getNumTorsProfileRestraints();
     numTorsProfileRestParams = force.getNumTorsProfileRestParams();
     numGMMRestraints = force.getNumGMMRestraints();
+    numEmapRestraints = force.getNumEmapRestraints();
     numRestraints = force.getNumTotalRestraints();
     numGroups = force.getNumGroups();
     numCollections = force.getNumCollections();
@@ -231,6 +233,15 @@ void ReferenceCalcMeldForceKernel::initialize(const System &system, const MeldFo
     gmmAtomIndices = std::vector<int>(calcSizeGMMAtomIndices(force), 0);
     gmmData = std::vector<float>(calcSizeGMMData(force), 0);
 
+    emapAtomIndices = std::vector<int>(numEmapRestraints,-1);
+    emapGridPos = std::vector<float3>(calcNumGrids(force),float3(0, 0, 0));
+    emapMu = std::vector<float>(calcNumGrids(force), 0);
+    emapBlur = std::vector<float>(calcNumGrids(force), 0);
+    emapBandwidth = std::vector<float>(calcNumGrids(force), 0);
+    emap_weights = std::vector<float>(numEmapRestraints, 0);
+    emapGlobalIndices = std::vector<int>(numEmapRestraints, -1);
+    emapRestForces = std::vector<float3>(numEmapRestraints, float3(0, 0, 0));
+
     restraintEnergies = std::vector<float>(numRestraints, 0);
     restraintActive = std::vector<bool>(numRestraints, false);
 
@@ -250,6 +261,7 @@ void ReferenceCalcMeldForceKernel::initialize(const System &system, const MeldFo
     setupDistProfileRestraints(force);
     setupTorsProfileRestraints(force);
     setupGMMRestraints(force);
+    setupEmapRestraints(force);
     setupGroups(force);
     setupCollections(force);
 }
@@ -349,6 +361,23 @@ double ReferenceCalcMeldForceKernel::execute(ContextImpl &context, bool includeF
             gmmData,
             restraintEnergies,
             gmmForces);
+    }
+
+    if (numEmapRestraints > 0)
+    {
+        fill(emapRestForces.begin(), emapRestForces.end(), float3(0, 0, 0));
+        computeEmapRest(
+            pos,
+            emapAtomIndices,
+            emapGridPos,
+            emapMu,
+            emapBlur,
+            emapBandwidth,
+            emap_weights,
+            restraintEnergies,
+            emapGlobalIndices,
+            emapRestForces,
+            numEmapRestraints);
     }
 
     // now evaluate and active restraints based on groups
@@ -454,7 +483,20 @@ double ReferenceCalcMeldForceKernel::execute(ContextImpl &context, bool includeF
             gmmForces);
     }
 
+    if (numEmapRestraints > 0)
+    {
+        energy += applyEmapRest(
+            force,
+            emapAtomIndices,
+            emapGlobalIndices,
+            emapRestForces,
+            restraintEnergies,
+            numEmapRestraints);
+    }
+
     return energy;
+
+    
 }
 
 void ReferenceCalcMeldForceKernel::copyParametersToContext(ContextImpl &context, const MeldForce &force)
@@ -465,6 +507,7 @@ void ReferenceCalcMeldForceKernel::copyParametersToContext(ContextImpl &context,
     setupDistProfileRestraints(force);
     setupTorsProfileRestraints(force);
     setupGMMRestraints(force);
+    setupEmapRestraints(force);
     setupGroups(force);
     setupCollections(force);
 }
@@ -517,6 +560,16 @@ int ReferenceCalcMeldForceKernel::calcSizeGMMData(const MeldForce &force)
             nComponents * nPairs * (nPairs - 1) / 2; // precision off diagonals
     }
     return total;
+}
+
+int ReferenceCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
+{
+    int atom, global_index;
+    std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
+    if (numEmapRestraints > 0) {
+        force.getEmapRestraintParams(0, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+    }
+    return gridpos_x.size();
 }
 
 void ReferenceCalcMeldForceKernel::setupDistanceRestraints(const MeldForce &force)
@@ -771,6 +824,28 @@ void ReferenceCalcMeldForceKernel::setupGMMRestraints(const MeldForce &force)
     }
 }
 
+void ReferenceCalcMeldForceKernel::setupEmapRestraints(const MeldForce &force)
+{
+    int numAtoms = system.getNumParticles();
+    std::string restType = "emap restraint";
+    for (int i = 0; i < numEmapRestraints; ++i)
+    {
+        int atom, global_index;
+        std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
+        force.getEmapRestraintParams(i, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+        checkAtomIndex(numAtoms, restType, atom, i, global_index);
+        for (int d = 0; d < gridpos_x.size(); ++d) {
+            emapGridPos[d] = float3(gridpos_x[d], gridpos_y[d], gridpos_z[d]);
+            emapMu[d] = mu[d];
+            emapBlur[d] = blur[d];
+            emapBandwidth[d] = bandwidth[d];
+        }
+        emapAtomIndices[i] = atom;
+        emap_weights[i] = system.getParticleMass(atom);
+        emapGlobalIndices[i] = global_index;
+    }
+}
+
 void ReferenceCalcMeldForceKernel::setupGroups(const MeldForce &force)
 {
     std::vector<int> restraintAssigned(numRestraints, -1);
@@ -781,7 +856,6 @@ void ReferenceCalcMeldForceKernel::setupGroups(const MeldForce &force)
         std::vector<int> indices;
         int numActive;
         force.getGroupParams(i, indices, numActive);
-
         checkGroupCollectionIndices(numRestraints, indices, restraintAssigned, i, "Restraint", "Group");
         checkNumActive(indices, numActive, i, "Group");
 

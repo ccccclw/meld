@@ -16,6 +16,7 @@ from meld.system import restraints
 from collections import OrderedDict, Callable
 from meld.system.openmm_runner.transform import TransformerBase
 from simtk import openmm as mm  # type: ignore
+import numpy as np
 
 try:
     from meldplugin import MeldForce  # type: ignore
@@ -632,6 +633,7 @@ class MeldRestraintTransformer(TransformerBase):
             dist_prof_index = 0
             tors_prof_index = 0
             gmm_index = 0
+            emap_index = 0
             if self.always_on:
                 for rest in self.always_on:
                     (
@@ -641,6 +643,7 @@ class MeldRestraintTransformer(TransformerBase):
                         dist_prof_index,
                         tors_prof_index,
                         gmm_index,
+                        emap_index
                     ) = _update_meld_restraint(
                         rest,
                         self.force,
@@ -652,6 +655,7 @@ class MeldRestraintTransformer(TransformerBase):
                         dist_prof_index,
                         tors_prof_index,
                         gmm_index,
+                        emap_index
                     )
             for coll in self.selective_on:
                 for group in coll.groups:
@@ -663,6 +667,7 @@ class MeldRestraintTransformer(TransformerBase):
                             dist_prof_index,
                             tors_prof_index,
                             gmm_index,
+                            emap_index,
                         ) = _update_meld_restraint(
                             rest,
                             self.force,
@@ -674,6 +679,7 @@ class MeldRestraintTransformer(TransformerBase):
                             dist_prof_index,
                             tors_prof_index,
                             gmm_index,
+                            emap_index,
                         )
             self.force.updateParametersInContext(simulation.context)
 
@@ -768,6 +774,20 @@ def _add_meld_restraint(rest, meld_force, alpha, timestep):
 
         d, o = _setup_precisions(rest.precisions, nd, nc)
         rest_index = meld_force.addGMMRestraint(nd, nc, scale, a, w, m, d, o)
+    
+    elif isinstance(rest, restraints.EmapRestraint):
+        rest_index = meld_force.addEmapRestraint(
+        [a-1 for a in rest.atom_index],
+        rest.mu,
+        np.ones(rest.mu.shape)*scale,
+        rest.bandwidth,
+        rest.gridpos[:,0],
+        rest.gridpos[:,1],
+        rest.gridpos[:,2]
+        )
+    
+
+
 
     else:
         raise RuntimeError(f"Do not know how to handle restraint {rest}")
@@ -786,6 +806,7 @@ def _update_meld_restraint(
     dist_prof_index,
     tors_prof_index,
     gmm_index,
+    emap_index,
 ):
     scale = rest.scaler(alpha) * rest.ramp(timestep)
 
@@ -886,6 +907,21 @@ def _update_meld_restraint(
         d, o = _setup_precisions(rest.precisions, nd, nc)
         _ = meld_force.modifyGMMRestraint(gmm_index, nd, nc, scale, a, w, m, d, o)
         gmm_index += 1
+    
+    elif isinstance(rest, restraints.EmapRestraint):
+        meld_force.modifyEmapRestraint(
+        emap_index,
+        [a-1 for a in rest.atom_index],
+        rest.mu,
+        np.ones(rest.mu.shape)*scale,
+        rest.bandwidth,
+        rest.gridpos[:,0],
+        rest.gridpos[:,1],
+        rest.gridpos[:,2]
+        )
+        emap_index += 1
+
+
 
     else:
         raise RuntimeError(f"Do not know how to handle restraint {rest}")
@@ -897,6 +933,7 @@ def _update_meld_restraint(
         dist_prof_index,
         tors_prof_index,
         gmm_index,
+        emap_index
     )
 
 
