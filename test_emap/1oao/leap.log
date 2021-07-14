@@ -1,0 +1,4076 @@
+log started: Mon Jun 21 18:37:27 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the ff14SBonlysc (ff14SB only side chain) force field
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #    Uses frcmod.ff14SB + frcmod.ff99SB14 for proteins
+>> #       = ff99SB backbone + ff14SB side chains;
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "C8"  "C" "sp3" }
+>> 	{ "2C"  "C" "sp3" }
+>> 	{ "3C"  "C" "sp3" }
+>> 	{ "CH"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "CO"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CJ"  "C" "sp2" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NP"  "N" "sp2" }
+>> 	{ "NQ"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> parm10 = loadamberparams parm10.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+(UNKNOWN ATOM TYPE: Zn)
+(UNKNOWN ATOM TYPE: EP)
+>> frcmod14SB = loadamberparams frcmod.ff14SB
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+>> frcmod99SBbb = loadamberparams frcmod.ff99SB14
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff99SB14
+Reading force field modification type file (frcmod)
+Reading title:
+ff99SB backbone parameters (Hornak & Simmerling) with ff14SB atom types
+>> #
+>> #	Load main chain and terminating amino acid libraries, nucleic acids
+>> #
+>> loadOff amino12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/amino12.lib
+Loading: ALA
+Loading: ARG
+Loading: ASH
+Loading: ASN
+Loading: ASP
+Loading: CYM
+Loading: CYS
+Loading: CYX
+Loading: GLH
+Loading: GLN
+Loading: GLU
+Loading: GLY
+Loading: HID
+Loading: HIE
+Loading: HIP
+Loading: HYP
+Loading: ILE
+Loading: LEU
+Loading: LYN
+Loading: LYS
+Loading: MET
+Loading: PHE
+Loading: PRO
+Loading: SER
+Loading: THR
+Loading: TRP
+Loading: TYR
+Loading: VAL
+>> loadOff aminoct12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminoct12.lib
+Loading: CALA
+Loading: CARG
+Loading: CASN
+Loading: CASP
+Loading: CCYS
+Loading: CCYX
+Loading: CGLN
+Loading: CGLU
+Loading: CGLY
+Loading: CHID
+Loading: CHIE
+Loading: CHIP
+Loading: CHYP
+Loading: CILE
+Loading: CLEU
+Loading: CLYS
+Loading: CMET
+Loading: CPHE
+Loading: CPRO
+Loading: CSER
+Loading: CTHR
+Loading: CTRP
+Loading: CTYR
+Loading: CVAL
+Loading: NHE
+Loading: NME
+>> loadOff aminont12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminont12.lib
+Loading: ACE
+Loading: NALA
+Loading: NARG
+Loading: NASN
+Loading: NASP
+Loading: NCYS
+Loading: NCYX
+Loading: NGLN
+Loading: NGLU
+Loading: NGLY
+Loading: NHID
+Loading: NHIE
+Loading: NHIP
+Loading: NILE
+Loading: NLEU
+Loading: NLYS
+Loading: NMET
+Loading: NPHE
+Loading: NPRO
+Loading: NSER
+Loading: NTHR
+Loading: NTRP
+Loading: NTYR
+Loading: NVAL
+>> 
+>> #
+>> #	Define the PDB name map for the amino acids and nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "HYP" "NHYP" } { 1 "HYP" "CHYP" }
+>>   { 0 "ALA" "NALA" } { 1 "ALA" "CALA" }
+>>   { 0 "ARG" "NARG" } { 1 "ARG" "CARG" }
+>>   { 0 "ASN" "NASN" } { 1 "ASN" "CASN" }
+>>   { 0 "ASP" "NASP" } { 1 "ASP" "CASP" }
+>>   { 0 "CYS" "NCYS" } { 1 "CYS" "CCYS" }
+>>   { 0 "CYX" "NCYX" } { 1 "CYX" "CCYX" }
+>>   { 0 "GLN" "NGLN" } { 1 "GLN" "CGLN" }
+>>   { 0 "GLU" "NGLU" } { 1 "GLU" "CGLU" }
+>>   { 0 "GLY" "NGLY" } { 1 "GLY" "CGLY" }
+>>   { 0 "HID" "NHID" } { 1 "HID" "CHID" }
+>>   { 0 "HIE" "NHIE" } { 1 "HIE" "CHIE" }
+>>   { 0 "HIP" "NHIP" } { 1 "HIP" "CHIP" }
+>>   { 0 "ILE" "NILE" } { 1 "ILE" "CILE" }
+>>   { 0 "LEU" "NLEU" } { 1 "LEU" "CLEU" }
+>>   { 0 "LYS" "NLYS" } { 1 "LYS" "CLYS" }
+>>   { 0 "MET" "NMET" } { 1 "MET" "CMET" }
+>>   { 0 "PHE" "NPHE" } { 1 "PHE" "CPHE" }
+>>   { 0 "PRO" "NPRO" } { 1 "PRO" "CPRO" }
+>>   { 0 "SER" "NSER" } { 1 "SER" "CSER" }
+>>   { 0 "THR" "NTHR" } { 1 "THR" "CTHR" }
+>>   { 0 "TRP" "NTRP" } { 1 "TRP" "CTRP" }
+>>   { 0 "TYR" "NTYR" } { 1 "TYR" "CTYR" }
+>>   { 0 "VAL" "NVAL" } { 1 "VAL" "CVAL" }
+>>   { 0 "HIS" "NHIS" } { 1 "HIS" "CHIS" }
+>> }
+>> 
+>> #
+>> # assume that most often proteins use HIE
+>> #
+>> NHIS = NHIE
+>> HIS = HIE
+>> CHIS = CHIE
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #   Uses ff99bsc0+bsc1 for DNA
+>> #               (ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #               (bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #               (bsc1): Ivani et al. Nature Methods 13: 55, 2016
+>> #   load atom type hybridizations
+>> #
+>> addAtomTypes {
+>>     { "H"   "H" "sp3" }
+>>     { "HO"  "H" "sp3" }
+>>     { "HS"  "H" "sp3" }
+>>     { "H1"  "H" "sp3" }
+>>     { "H2"  "H" "sp3" }
+>>     { "H3"  "H" "sp3" }
+>>     { "H4"  "H" "sp3" }
+>>     { "H5"  "H" "sp3" }
+>>     { "HW"  "H" "sp3" }
+>>     { "HC"  "H" "sp3" }
+>>     { "HA"  "H" "sp3" }
+>>     { "HP"  "H" "sp3" }
+>>     { "HZ"  "H" "sp3" }
+>>     { "OH"  "O" "sp3" }
+>>     { "OS"  "O" "sp3" }
+>>     { "O"   "O" "sp2" }
+>>     { "O2"  "O" "sp2" }
+>>     { "OP"  "O" "sp2" }
+>>     { "OW"  "O" "sp3" }
+>>     { "CT"  "C" "sp3" }
+>>     { "CX"  "C" "sp3" }
+>>     { "C8"  "C" "sp3" }
+>>     { "2C"  "C" "sp3" }
+>>     { "3C"  "C" "sp3" }
+>>     { "CH"  "C" "sp3" }
+>>     { "CS"  "C" "sp2" }
+>>     { "C"   "C" "sp2" }
+>>     { "CO"  "C" "sp2" }
+>>     { "C*"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CB"  "C" "sp2" }
+>>     { "CC"  "C" "sp2" }
+>>     { "CN"  "C" "sp2" }
+>>     { "CM"  "C" "sp2" }
+>>     { "CK"  "C" "sp2" }
+>>     { "CQ"  "C" "sp2" }
+>>     { "CD"  "C" "sp2" }
+>>     { "C5"  "C" "sp2" }
+>>     { "C4"  "C" "sp2" }
+>>     { "CP"  "C" "sp2" }
+>>     { "CI"  "C" "sp3" }
+>>     { "CJ"  "C" "sp2" }
+>>     { "CW"  "C" "sp2" }
+>>     { "CV"  "C" "sp2" }
+>>     { "CR"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CY"  "C" "sp2" }
+>>     { "C0"  "Ca" "sp3" }
+>>     { "MG"  "Mg" "sp3" }
+>>     { "N"   "N" "sp2" }
+>>     { "NA"  "N" "sp2" }
+>>     { "N2"  "N" "sp2" }
+>>     { "N*"  "N" "sp2" }
+>>     { "NP"  "N" "sp2" }
+>>     { "NQ"  "N" "sp2" }
+>>     { "NB"  "N" "sp2" }
+>>     { "NC"  "N" "sp2" }
+>>     { "NT"  "N" "sp3" }
+>>     { "NY"  "N" "sp2" }
+>>     { "N3"  "N" "sp3" }
+>>     { "S"   "S" "sp3" }
+>>     { "SH"  "S" "sp3" }
+>>     { "P"   "P" "sp3" }
+>>     { "LP"  ""  "sp3" }
+>>     { "EP"  ""  "sp3" }
+>>     { "F"   "F" "sp3" }
+>>     { "Cl"  "Cl" "sp3" }
+>>     { "Br"  "Br" "sp3" }
+>>     { "I"   "I"  "sp3" }
+>>     { "F-"   "F" "sp3" }
+>>     { "Cl-"  "Cl" "sp3" }
+>>     { "Br-"  "Br" "sp3" }
+>>     { "I-"   "I"  "sp3" }
+>>     { "Li+"  "Li"  "sp3" }
+>>     { "Na+"  "Na"  "sp3" }
+>>     { "K+"  "K"  "sp3" }
+>>     { "Rb+"  "Rb"  "sp3" }
+>>     { "Cs+"  "Cs"  "sp3" }
+>>     { "Mg+"  "Mg"  "sp3" }
+>> }
+>> #
+>> #   Load nucleic acids
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> 
+>> addPdbResMap {
+>>   { 0 "DG" "DG5"  } { 1 "DG" "DG3"  }  
+>>   { 0 "DA" "DA5"  } { 1 "DA" "DA3"  }  
+>>   { 0 "DC" "DC5"  } { 1 "DC" "DC3"  }  
+>>   { 0 "DT" "DT5"  } { 1 "DT" "DT3"  }  
+>> #  some really old Amber residue names, assuming DNA:
+>>   { 0 "GUA" "DG5"  } { 1 "GUA" "DG3"  } { "GUA" "DG" }
+>>   { 0 "ADE" "DA5"  } { 1 "ADE" "DA3"  } { "ADE" "DA" }
+>>   { 0 "CYT" "DC5"  } { 1 "CYT" "DC3"  } { "CYT" "DC" }
+>>   { 0 "THY" "DT5"  } { 1 "THY" "DT3"  } { "THY" "DT" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "'H2'" "H2''" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "'H5'" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>> }
+>> 
+>> #
+>> # Load parameters for BSC1
+>> #
+>> addAtomTypes {
+>>   { "C1" "C" "sp2" }
+>>   { "C2" "C" "sp2" }
+>>   { "CI" "C" "sp3" }
+>>   { "CE" "C" "sp3" }
+>>  }
+>> 
+>> loadoff parmBSC1.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/parmBSC1.lib
+Loading: DA
+Loading: DA3
+Loading: DA5
+Loading: DAN
+Loading: DC
+Loading: DC3
+Loading: DC5
+Loading: DCN
+Loading: DG
+Loading: DG3
+Loading: DG5
+Loading: DGN
+Loading: DT
+Loading: DT3
+Loading: DT5
+Loading: DTN
+>> loadamberparams frcmod.parmbsc1
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.parmbsc1
+Reading force field modification type file (frcmod)
+Reading title:
+Parmbsc1 force-field for DNA
+>> 
+>> ############
+>> # RNA ######
+>> # ##########
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #       Uses ff99bsc0_chiOL3 for RNA
+>> #       	(ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #       	(bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #       	(chiOL3): Zgarbova et al. JCTC 7: 2886, 2011
+>> #           (note: all of the above are in parm10.dat, loaded below)
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> #
+>> #	Load main chain and terminating nucleic acids
+>> #
+>> 
+>> loadOff RNA.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/RNA.lib
+Loading: A
+Loading: A3
+Loading: A5
+Loading: AN
+Loading: C
+Loading: C3
+Loading: C5
+Loading: CN
+Loading: G
+Loading: G3
+Loading: G5
+Loading: GN
+Loading: OHE
+Loading: U
+Loading: U3
+Loading: U5
+Loading: UN
+>> 
+>> #
+>> #	Define the PDB name map for the nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "G" "G5"  } { 1 "G" "G3"  } 
+>>   { 0 "A" "A5"  } { 1 "A" "A3"  } 
+>>   { 0 "C" "C5"  } { 1 "C" "C3"  } 
+>>   { 0 "U" "U5"  } { 1 "U" "U3"  } 
+>> #  some old Amber residue names for RNA:
+>>   { 0  "RA5" "A5" } { 1 "RA3" "A3"} {"RA" "A" }
+>>   { 0  "RC5" "C5" } { 1 "RC3" "C3"} {"RC" "C" }
+>>   { 0  "RG5" "G5" } { 1 "RG3" "G3"} {"RG" "G" }
+>>   { 0  "RU5" "U5" } { 1 "RU3" "U3"} {"RU" "U" }
+>> #  uncomment out the following if you have this old style RNA files:
+>> # { 0 "GUA" "G5"  } { 1 "GUA" "G3"  } { "GUA" "G" }
+>> # { 0 "ADE" "A5"  } { 1 "ADE" "A3"  } { "ADE" "A" }
+>> # { 0 "CYT" "C5"  } { 1 "CYT" "C3"  } { "CYT" "C" }
+>> # { 0 "URA" "R5"  } { 1 "URA" "R3"  } { "URA" "R" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>>   { "O3P" "OP3" }
+>> }
+Substituting map O5* -> O5'  for  O5* -> O5'
+Substituting map C5* -> C5'  for  C5* -> C5'
+Substituting map C4* -> C4'  for  C4* -> C4'
+Substituting map O4* -> O4'  for  O4* -> O4'
+Substituting map C3* -> C3'  for  C3* -> C3'
+Substituting map O3* -> O3'  for  O3* -> O3'
+Substituting map C2* -> C2'  for  C2* -> C2'
+Substituting map O2* -> O2'  for  O2* -> O2'
+Substituting map C1* -> C1'  for  C1* -> C1'
+Substituting map C5M -> C7  for  C5M -> C7
+Substituting map H1* -> H1'  for  H1* -> H1'
+Substituting map H2*1 -> H2'  for  H2*1 -> H2'
+Substituting map H2*2 -> H2''  for  H2*2 -> H2''
+Substituting map H2'1 -> H2'  for  H2'1 -> H2'
+Substituting map H2'2 -> H2''  for  H2'2 -> H2''
+Substituting map H3* -> H3'  for  H3* -> H3'
+Substituting map H4* -> H4'  for  H4* -> H4'
+Substituting map H5*1 -> H5'  for  H5*1 -> H5'
+Substituting map H5*2 -> H5''  for  H5*2 -> H5''
+Substituting map H5'1 -> H5'  for  H5'1 -> H5'
+Substituting map H5'2 -> H5''  for  H5'2 -> H5''
+Substituting map HO'2 -> HO2'  for  HO'2 -> HO2'
+Substituting map H5T -> HO5'  for  H5T -> HO5'
+Substituting map H3T -> HO3'  for  H3T -> HO3'
+Substituting map O1' -> O4'  for  O1' -> O4'
+Substituting map OA -> OP1  for  OA -> OP1
+Substituting map OB -> OP2  for  OB -> OP2
+Substituting map O1P -> OP1  for  O1P -> OP1
+Substituting map O2P -> OP2  for  O2P -> OP2
+>> 
+> 
+> source leaprc.gaff
+----- Source: /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff
+----- Source of /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff done
+>> logFile leap.log
+log started: Mon Jun 21 18:37:28 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the general Amber Force field.
+>> #       This file is mostly for use with Antechamber
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "h1"  "H" "sp3" }
+>> 	{ "h2"  "H" "sp3" }
+>> 	{ "h3"  "H" "sp3" }
+>> 	{ "h4"  "H" "sp3" }
+>> 	{ "h5"  "H" "sp3" }
+>> 	{ "ha"  "H" "sp3" }
+>> 	{ "hc"  "H" "sp3" }
+>> 	{ "hn"  "H" "sp3" }
+>> 	{ "ho"  "H" "sp3" }
+>> 	{ "hp"  "H" "sp3" }
+>> 	{ "hs"  "H" "sp3" }
+>> 	{ "hw"  "H" "sp3" }
+>> 	{ "hx"  "H" "sp3" }
+>> 	{ "o"  "O" "sp2" }
+>> 	{ "o2"  "O" "sp2" }
+>> 	{ "oh"  "O" "sp3" }
+>> 	{ "os"  "O" "sp3" }
+>> 	{ "ow"  "O" "sp3" }
+>> 	{ "c"  "C" "sp2" }
+>> 	{ "c1"  "C" "sp2" }
+>> 	{ "c2"  "C" "sp2" }
+>> 	{ "c3"  "C" "sp3" }
+>> 	{ "ca"  "C" "sp2" }
+>> 	{ "cc"  "C" "sp2" }
+>> 	{ "cd"  "C" "sp2" }
+>> 	{ "ce"  "C" "sp2" }
+>> 	{ "cf"  "C" "sp2" }
+>> 	{ "cg"  "C" "sp2" }
+>> 	{ "ch"  "C" "sp2" }
+>> 	{ "cp"  "C" "sp2" }
+>> 	{ "cq"  "C" "sp2" }
+>> 	{ "cu"  "C" "sp2" }
+>> 	{ "cv"  "C" "sp2" }
+>> 	{ "cx"  "C" "sp2" }
+>> 	{ "cy"  "C" "sp2" }
+>> 	{ "cz"  "C" "sp2" }
+>> 	{ "n"   "N" "sp2" }
+>> 	{ "n1"  "N" "sp2" }
+>> 	{ "n2"  "N" "sp2" }
+>> 	{ "n3"  "N" "sp3" }
+>> 	{ "n4"  "N" "sp3" }
+>> 	{ "na"  "N" "sp2" }
+>> 	{ "nb"  "N" "sp2" }
+>> 	{ "nc"  "N" "sp2" }
+>> 	{ "nd"  "N" "sp2" }
+>> 	{ "ne"  "N" "sp2" }
+>> 	{ "nf"  "N" "sp2" }
+>> 	{ "nh"  "N" "sp2" }
+>> 	{ "no"  "N" "sp2" }
+>> 	{ "s"   "S" "sp2" }
+>> 	{ "s2"   "S" "sp2" }
+>> 	{ "s3"   "S" "sp3" }
+>> 	{ "s4"   "S" "sp3" }
+>> 	{ "s6"   "S" "sp3" }
+>> 	{ "sh"   "S" "sp3" }
+>> 	{ "ss"   "S" "sp3" }
+>> 	{ "sx"   "S" "sp3" }
+>> 	{ "sy"   "S" "sp3" }
+>> 	{ "p2"   "P" "sp2" }
+>> 	{ "p3"   "P" "sp3" }
+>> 	{ "p4"   "P" "sp3" }
+>> 	{ "p5"   "P" "sp3" }
+>> 	{ "pb"   "P" "sp3" }
+>> 	{ "pc"   "P" "sp3" }
+>> 	{ "pd"   "P" "sp3" }
+>> 	{ "pe"   "P" "sp3" }
+>> 	{ "pf"   "P" "sp3" }
+>> 	{ "px"   "P" "sp3" }
+>> 	{ "py"   "P" "sp3" }
+>> 	{ "f"   "F" "sp3" }
+>> 	{ "cl"  "Cl" "sp3" }
+>> 	{ "br"  "Br" "sp3" }
+>> 	{ "i"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the general force field parameter set.
+>> #
+>> gaff = loadamberparams gaff.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+(UNKNOWN ATOM TYPE: oq)
+(UNKNOWN ATOM TYPE: ni)
+(UNKNOWN ATOM TYPE: nj)
+(UNKNOWN ATOM TYPE: nk)
+(UNKNOWN ATOM TYPE: nl)
+(UNKNOWN ATOM TYPE: nm)
+(UNKNOWN ATOM TYPE: nn)
+(UNKNOWN ATOM TYPE: sp)
+(UNKNOWN ATOM TYPE: sq)
+> 
+> mol_0 = loadPdb 1OAO_s.pdb
+Loading PDB file: ./1OAO_s.pdb
+Matching PDB residue names to LEaP variables.
+Mapped residue MET, term: Terminal/beginning, seq. number: 0 to: NMET.
+Mapped residue MET, term: Terminal/last, seq. number: 728 to: CMET.
+  total atoms in file: 11469
+> 
+> translate mol_0 { 0.0 0.0 0.0 }
+> sys = combine { mol_0  }
+  Sequence: default_name
+> check sys
+Checking 'sys'....
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485454 angstroms between .R<ILE 728>.A<H 2> and .R<ILE 728>.A<HG13 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485650 angstroms between .R<CYS 597>.A<H 2> and .R<GLY 596>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.244786 angstroms between .R<GLN 581>.A<HE22 15> and .R<ASN 568>.A<HD21 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.405924 angstroms between .R<LEU 579>.A<H 2> and .R<SER 575>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.217240 angstroms between .R<ARG 440>.A<HG3 10> and .R<ARG 440>.A<HH11 18>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.160590 angstroms between .R<ASN 424>.A<H 2> and .R<ASN 424>.A<HD22 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.450679 angstroms between .R<GLU 360>.A<H 2> and .R<SER 357>.A<O 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.214338 angstroms between .R<ARG 346>.A<H 2> and .R<ARG 346>.A<HG2 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.386448 angstroms between .R<THR 308>.A<HG1 12> and .R<PHE 293>.A<HZ 14>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 0.854857 angstroms between .R<THR 278>.A<HG1 12> and .R<HIE 258>.A<HE2 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.488268 angstroms between .R<ALA 264>.A<HB2 7> and .R<THR 106>.A<HG1 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.489771 angstroms between .R<LEU 223>.A<HB3 7> and .R<CYS 67>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.366290 angstroms between .R<ASN 211>.A<HD22 12> and .R<ASP 187>.A<HA 4>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.019942 angstroms between .R<GLN 192>.A<HE21 14> and .R<ALA 163>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.487905 angstroms between .R<GLN 192>.A<HE22 15> and .R<ALA 189>.A<HA 4>
+Checking parameters for unit 'sys'.
+Checking for bond parameters.
+Checking for angle parameters.
+check:  Warnings: 16
+Unit is OK.
+> savepdb mol_0 1OAO_leap.pdb 
+Writing pdb file: 1OAO_leap.pdb
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NMET -> MET
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CMET -> MET
+> #saveAmberParm sys system.top system.mdcrd
+> quit
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 18; Notes = 0.
+log started: Mon Jun 21 20:12:41 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the ff14SBonlysc (ff14SB only side chain) force field
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #    Uses frcmod.ff14SB + frcmod.ff99SB14 for proteins
+>> #       = ff99SB backbone + ff14SB side chains;
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "C8"  "C" "sp3" }
+>> 	{ "2C"  "C" "sp3" }
+>> 	{ "3C"  "C" "sp3" }
+>> 	{ "CH"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "CO"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CJ"  "C" "sp2" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NP"  "N" "sp2" }
+>> 	{ "NQ"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> parm10 = loadamberparams parm10.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+(UNKNOWN ATOM TYPE: Zn)
+(UNKNOWN ATOM TYPE: EP)
+>> frcmod14SB = loadamberparams frcmod.ff14SB
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+>> frcmod99SBbb = loadamberparams frcmod.ff99SB14
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff99SB14
+Reading force field modification type file (frcmod)
+Reading title:
+ff99SB backbone parameters (Hornak & Simmerling) with ff14SB atom types
+>> #
+>> #	Load main chain and terminating amino acid libraries, nucleic acids
+>> #
+>> loadOff amino12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/amino12.lib
+Loading: ALA
+Loading: ARG
+Loading: ASH
+Loading: ASN
+Loading: ASP
+Loading: CYM
+Loading: CYS
+Loading: CYX
+Loading: GLH
+Loading: GLN
+Loading: GLU
+Loading: GLY
+Loading: HID
+Loading: HIE
+Loading: HIP
+Loading: HYP
+Loading: ILE
+Loading: LEU
+Loading: LYN
+Loading: LYS
+Loading: MET
+Loading: PHE
+Loading: PRO
+Loading: SER
+Loading: THR
+Loading: TRP
+Loading: TYR
+Loading: VAL
+>> loadOff aminoct12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminoct12.lib
+Loading: CALA
+Loading: CARG
+Loading: CASN
+Loading: CASP
+Loading: CCYS
+Loading: CCYX
+Loading: CGLN
+Loading: CGLU
+Loading: CGLY
+Loading: CHID
+Loading: CHIE
+Loading: CHIP
+Loading: CHYP
+Loading: CILE
+Loading: CLEU
+Loading: CLYS
+Loading: CMET
+Loading: CPHE
+Loading: CPRO
+Loading: CSER
+Loading: CTHR
+Loading: CTRP
+Loading: CTYR
+Loading: CVAL
+Loading: NHE
+Loading: NME
+>> loadOff aminont12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminont12.lib
+Loading: ACE
+Loading: NALA
+Loading: NARG
+Loading: NASN
+Loading: NASP
+Loading: NCYS
+Loading: NCYX
+Loading: NGLN
+Loading: NGLU
+Loading: NGLY
+Loading: NHID
+Loading: NHIE
+Loading: NHIP
+Loading: NILE
+Loading: NLEU
+Loading: NLYS
+Loading: NMET
+Loading: NPHE
+Loading: NPRO
+Loading: NSER
+Loading: NTHR
+Loading: NTRP
+Loading: NTYR
+Loading: NVAL
+>> 
+>> #
+>> #	Define the PDB name map for the amino acids and nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "HYP" "NHYP" } { 1 "HYP" "CHYP" }
+>>   { 0 "ALA" "NALA" } { 1 "ALA" "CALA" }
+>>   { 0 "ARG" "NARG" } { 1 "ARG" "CARG" }
+>>   { 0 "ASN" "NASN" } { 1 "ASN" "CASN" }
+>>   { 0 "ASP" "NASP" } { 1 "ASP" "CASP" }
+>>   { 0 "CYS" "NCYS" } { 1 "CYS" "CCYS" }
+>>   { 0 "CYX" "NCYX" } { 1 "CYX" "CCYX" }
+>>   { 0 "GLN" "NGLN" } { 1 "GLN" "CGLN" }
+>>   { 0 "GLU" "NGLU" } { 1 "GLU" "CGLU" }
+>>   { 0 "GLY" "NGLY" } { 1 "GLY" "CGLY" }
+>>   { 0 "HID" "NHID" } { 1 "HID" "CHID" }
+>>   { 0 "HIE" "NHIE" } { 1 "HIE" "CHIE" }
+>>   { 0 "HIP" "NHIP" } { 1 "HIP" "CHIP" }
+>>   { 0 "ILE" "NILE" } { 1 "ILE" "CILE" }
+>>   { 0 "LEU" "NLEU" } { 1 "LEU" "CLEU" }
+>>   { 0 "LYS" "NLYS" } { 1 "LYS" "CLYS" }
+>>   { 0 "MET" "NMET" } { 1 "MET" "CMET" }
+>>   { 0 "PHE" "NPHE" } { 1 "PHE" "CPHE" }
+>>   { 0 "PRO" "NPRO" } { 1 "PRO" "CPRO" }
+>>   { 0 "SER" "NSER" } { 1 "SER" "CSER" }
+>>   { 0 "THR" "NTHR" } { 1 "THR" "CTHR" }
+>>   { 0 "TRP" "NTRP" } { 1 "TRP" "CTRP" }
+>>   { 0 "TYR" "NTYR" } { 1 "TYR" "CTYR" }
+>>   { 0 "VAL" "NVAL" } { 1 "VAL" "CVAL" }
+>>   { 0 "HIS" "NHIS" } { 1 "HIS" "CHIS" }
+>> }
+>> 
+>> #
+>> # assume that most often proteins use HIE
+>> #
+>> NHIS = NHIE
+>> HIS = HIE
+>> CHIS = CHIE
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #   Uses ff99bsc0+bsc1 for DNA
+>> #               (ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #               (bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #               (bsc1): Ivani et al. Nature Methods 13: 55, 2016
+>> #   load atom type hybridizations
+>> #
+>> addAtomTypes {
+>>     { "H"   "H" "sp3" }
+>>     { "HO"  "H" "sp3" }
+>>     { "HS"  "H" "sp3" }
+>>     { "H1"  "H" "sp3" }
+>>     { "H2"  "H" "sp3" }
+>>     { "H3"  "H" "sp3" }
+>>     { "H4"  "H" "sp3" }
+>>     { "H5"  "H" "sp3" }
+>>     { "HW"  "H" "sp3" }
+>>     { "HC"  "H" "sp3" }
+>>     { "HA"  "H" "sp3" }
+>>     { "HP"  "H" "sp3" }
+>>     { "HZ"  "H" "sp3" }
+>>     { "OH"  "O" "sp3" }
+>>     { "OS"  "O" "sp3" }
+>>     { "O"   "O" "sp2" }
+>>     { "O2"  "O" "sp2" }
+>>     { "OP"  "O" "sp2" }
+>>     { "OW"  "O" "sp3" }
+>>     { "CT"  "C" "sp3" }
+>>     { "CX"  "C" "sp3" }
+>>     { "C8"  "C" "sp3" }
+>>     { "2C"  "C" "sp3" }
+>>     { "3C"  "C" "sp3" }
+>>     { "CH"  "C" "sp3" }
+>>     { "CS"  "C" "sp2" }
+>>     { "C"   "C" "sp2" }
+>>     { "CO"  "C" "sp2" }
+>>     { "C*"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CB"  "C" "sp2" }
+>>     { "CC"  "C" "sp2" }
+>>     { "CN"  "C" "sp2" }
+>>     { "CM"  "C" "sp2" }
+>>     { "CK"  "C" "sp2" }
+>>     { "CQ"  "C" "sp2" }
+>>     { "CD"  "C" "sp2" }
+>>     { "C5"  "C" "sp2" }
+>>     { "C4"  "C" "sp2" }
+>>     { "CP"  "C" "sp2" }
+>>     { "CI"  "C" "sp3" }
+>>     { "CJ"  "C" "sp2" }
+>>     { "CW"  "C" "sp2" }
+>>     { "CV"  "C" "sp2" }
+>>     { "CR"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CY"  "C" "sp2" }
+>>     { "C0"  "Ca" "sp3" }
+>>     { "MG"  "Mg" "sp3" }
+>>     { "N"   "N" "sp2" }
+>>     { "NA"  "N" "sp2" }
+>>     { "N2"  "N" "sp2" }
+>>     { "N*"  "N" "sp2" }
+>>     { "NP"  "N" "sp2" }
+>>     { "NQ"  "N" "sp2" }
+>>     { "NB"  "N" "sp2" }
+>>     { "NC"  "N" "sp2" }
+>>     { "NT"  "N" "sp3" }
+>>     { "NY"  "N" "sp2" }
+>>     { "N3"  "N" "sp3" }
+>>     { "S"   "S" "sp3" }
+>>     { "SH"  "S" "sp3" }
+>>     { "P"   "P" "sp3" }
+>>     { "LP"  ""  "sp3" }
+>>     { "EP"  ""  "sp3" }
+>>     { "F"   "F" "sp3" }
+>>     { "Cl"  "Cl" "sp3" }
+>>     { "Br"  "Br" "sp3" }
+>>     { "I"   "I"  "sp3" }
+>>     { "F-"   "F" "sp3" }
+>>     { "Cl-"  "Cl" "sp3" }
+>>     { "Br-"  "Br" "sp3" }
+>>     { "I-"   "I"  "sp3" }
+>>     { "Li+"  "Li"  "sp3" }
+>>     { "Na+"  "Na"  "sp3" }
+>>     { "K+"  "K"  "sp3" }
+>>     { "Rb+"  "Rb"  "sp3" }
+>>     { "Cs+"  "Cs"  "sp3" }
+>>     { "Mg+"  "Mg"  "sp3" }
+>> }
+>> #
+>> #   Load nucleic acids
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> 
+>> addPdbResMap {
+>>   { 0 "DG" "DG5"  } { 1 "DG" "DG3"  }  
+>>   { 0 "DA" "DA5"  } { 1 "DA" "DA3"  }  
+>>   { 0 "DC" "DC5"  } { 1 "DC" "DC3"  }  
+>>   { 0 "DT" "DT5"  } { 1 "DT" "DT3"  }  
+>> #  some really old Amber residue names, assuming DNA:
+>>   { 0 "GUA" "DG5"  } { 1 "GUA" "DG3"  } { "GUA" "DG" }
+>>   { 0 "ADE" "DA5"  } { 1 "ADE" "DA3"  } { "ADE" "DA" }
+>>   { 0 "CYT" "DC5"  } { 1 "CYT" "DC3"  } { "CYT" "DC" }
+>>   { 0 "THY" "DT5"  } { 1 "THY" "DT3"  } { "THY" "DT" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "'H2'" "H2''" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "'H5'" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>> }
+>> 
+>> #
+>> # Load parameters for BSC1
+>> #
+>> addAtomTypes {
+>>   { "C1" "C" "sp2" }
+>>   { "C2" "C" "sp2" }
+>>   { "CI" "C" "sp3" }
+>>   { "CE" "C" "sp3" }
+>>  }
+>> 
+>> loadoff parmBSC1.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/parmBSC1.lib
+Loading: DA
+Loading: DA3
+Loading: DA5
+Loading: DAN
+Loading: DC
+Loading: DC3
+Loading: DC5
+Loading: DCN
+Loading: DG
+Loading: DG3
+Loading: DG5
+Loading: DGN
+Loading: DT
+Loading: DT3
+Loading: DT5
+Loading: DTN
+>> loadamberparams frcmod.parmbsc1
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.parmbsc1
+Reading force field modification type file (frcmod)
+Reading title:
+Parmbsc1 force-field for DNA
+>> 
+>> ############
+>> # RNA ######
+>> # ##########
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #       Uses ff99bsc0_chiOL3 for RNA
+>> #       	(ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #       	(bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #       	(chiOL3): Zgarbova et al. JCTC 7: 2886, 2011
+>> #           (note: all of the above are in parm10.dat, loaded below)
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> #
+>> #	Load main chain and terminating nucleic acids
+>> #
+>> 
+>> loadOff RNA.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/RNA.lib
+Loading: A
+Loading: A3
+Loading: A5
+Loading: AN
+Loading: C
+Loading: C3
+Loading: C5
+Loading: CN
+Loading: G
+Loading: G3
+Loading: G5
+Loading: GN
+Loading: OHE
+Loading: U
+Loading: U3
+Loading: U5
+Loading: UN
+>> 
+>> #
+>> #	Define the PDB name map for the nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "G" "G5"  } { 1 "G" "G3"  } 
+>>   { 0 "A" "A5"  } { 1 "A" "A3"  } 
+>>   { 0 "C" "C5"  } { 1 "C" "C3"  } 
+>>   { 0 "U" "U5"  } { 1 "U" "U3"  } 
+>> #  some old Amber residue names for RNA:
+>>   { 0  "RA5" "A5" } { 1 "RA3" "A3"} {"RA" "A" }
+>>   { 0  "RC5" "C5" } { 1 "RC3" "C3"} {"RC" "C" }
+>>   { 0  "RG5" "G5" } { 1 "RG3" "G3"} {"RG" "G" }
+>>   { 0  "RU5" "U5" } { 1 "RU3" "U3"} {"RU" "U" }
+>> #  uncomment out the following if you have this old style RNA files:
+>> # { 0 "GUA" "G5"  } { 1 "GUA" "G3"  } { "GUA" "G" }
+>> # { 0 "ADE" "A5"  } { 1 "ADE" "A3"  } { "ADE" "A" }
+>> # { 0 "CYT" "C5"  } { 1 "CYT" "C3"  } { "CYT" "C" }
+>> # { 0 "URA" "R5"  } { 1 "URA" "R3"  } { "URA" "R" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>>   { "O3P" "OP3" }
+>> }
+Substituting map O5* -> O5'  for  O5* -> O5'
+Substituting map C5* -> C5'  for  C5* -> C5'
+Substituting map C4* -> C4'  for  C4* -> C4'
+Substituting map O4* -> O4'  for  O4* -> O4'
+Substituting map C3* -> C3'  for  C3* -> C3'
+Substituting map O3* -> O3'  for  O3* -> O3'
+Substituting map C2* -> C2'  for  C2* -> C2'
+Substituting map O2* -> O2'  for  O2* -> O2'
+Substituting map C1* -> C1'  for  C1* -> C1'
+Substituting map C5M -> C7  for  C5M -> C7
+Substituting map H1* -> H1'  for  H1* -> H1'
+Substituting map H2*1 -> H2'  for  H2*1 -> H2'
+Substituting map H2*2 -> H2''  for  H2*2 -> H2''
+Substituting map H2'1 -> H2'  for  H2'1 -> H2'
+Substituting map H2'2 -> H2''  for  H2'2 -> H2''
+Substituting map H3* -> H3'  for  H3* -> H3'
+Substituting map H4* -> H4'  for  H4* -> H4'
+Substituting map H5*1 -> H5'  for  H5*1 -> H5'
+Substituting map H5*2 -> H5''  for  H5*2 -> H5''
+Substituting map H5'1 -> H5'  for  H5'1 -> H5'
+Substituting map H5'2 -> H5''  for  H5'2 -> H5''
+Substituting map HO'2 -> HO2'  for  HO'2 -> HO2'
+Substituting map H5T -> HO5'  for  H5T -> HO5'
+Substituting map H3T -> HO3'  for  H3T -> HO3'
+Substituting map O1' -> O4'  for  O1' -> O4'
+Substituting map OA -> OP1  for  OA -> OP1
+Substituting map OB -> OP2  for  OB -> OP2
+Substituting map O1P -> OP1  for  O1P -> OP1
+Substituting map O2P -> OP2  for  O2P -> OP2
+>> 
+> 
+> source leaprc.gaff
+----- Source: /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff
+----- Source of /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff done
+>> logFile leap.log
+log started: Mon Jun 21 20:12:41 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the general Amber Force field.
+>> #       This file is mostly for use with Antechamber
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "h1"  "H" "sp3" }
+>> 	{ "h2"  "H" "sp3" }
+>> 	{ "h3"  "H" "sp3" }
+>> 	{ "h4"  "H" "sp3" }
+>> 	{ "h5"  "H" "sp3" }
+>> 	{ "ha"  "H" "sp3" }
+>> 	{ "hc"  "H" "sp3" }
+>> 	{ "hn"  "H" "sp3" }
+>> 	{ "ho"  "H" "sp3" }
+>> 	{ "hp"  "H" "sp3" }
+>> 	{ "hs"  "H" "sp3" }
+>> 	{ "hw"  "H" "sp3" }
+>> 	{ "hx"  "H" "sp3" }
+>> 	{ "o"  "O" "sp2" }
+>> 	{ "o2"  "O" "sp2" }
+>> 	{ "oh"  "O" "sp3" }
+>> 	{ "os"  "O" "sp3" }
+>> 	{ "ow"  "O" "sp3" }
+>> 	{ "c"  "C" "sp2" }
+>> 	{ "c1"  "C" "sp2" }
+>> 	{ "c2"  "C" "sp2" }
+>> 	{ "c3"  "C" "sp3" }
+>> 	{ "ca"  "C" "sp2" }
+>> 	{ "cc"  "C" "sp2" }
+>> 	{ "cd"  "C" "sp2" }
+>> 	{ "ce"  "C" "sp2" }
+>> 	{ "cf"  "C" "sp2" }
+>> 	{ "cg"  "C" "sp2" }
+>> 	{ "ch"  "C" "sp2" }
+>> 	{ "cp"  "C" "sp2" }
+>> 	{ "cq"  "C" "sp2" }
+>> 	{ "cu"  "C" "sp2" }
+>> 	{ "cv"  "C" "sp2" }
+>> 	{ "cx"  "C" "sp2" }
+>> 	{ "cy"  "C" "sp2" }
+>> 	{ "cz"  "C" "sp2" }
+>> 	{ "n"   "N" "sp2" }
+>> 	{ "n1"  "N" "sp2" }
+>> 	{ "n2"  "N" "sp2" }
+>> 	{ "n3"  "N" "sp3" }
+>> 	{ "n4"  "N" "sp3" }
+>> 	{ "na"  "N" "sp2" }
+>> 	{ "nb"  "N" "sp2" }
+>> 	{ "nc"  "N" "sp2" }
+>> 	{ "nd"  "N" "sp2" }
+>> 	{ "ne"  "N" "sp2" }
+>> 	{ "nf"  "N" "sp2" }
+>> 	{ "nh"  "N" "sp2" }
+>> 	{ "no"  "N" "sp2" }
+>> 	{ "s"   "S" "sp2" }
+>> 	{ "s2"   "S" "sp2" }
+>> 	{ "s3"   "S" "sp3" }
+>> 	{ "s4"   "S" "sp3" }
+>> 	{ "s6"   "S" "sp3" }
+>> 	{ "sh"   "S" "sp3" }
+>> 	{ "ss"   "S" "sp3" }
+>> 	{ "sx"   "S" "sp3" }
+>> 	{ "sy"   "S" "sp3" }
+>> 	{ "p2"   "P" "sp2" }
+>> 	{ "p3"   "P" "sp3" }
+>> 	{ "p4"   "P" "sp3" }
+>> 	{ "p5"   "P" "sp3" }
+>> 	{ "pb"   "P" "sp3" }
+>> 	{ "pc"   "P" "sp3" }
+>> 	{ "pd"   "P" "sp3" }
+>> 	{ "pe"   "P" "sp3" }
+>> 	{ "pf"   "P" "sp3" }
+>> 	{ "px"   "P" "sp3" }
+>> 	{ "py"   "P" "sp3" }
+>> 	{ "f"   "F" "sp3" }
+>> 	{ "cl"  "Cl" "sp3" }
+>> 	{ "br"  "Br" "sp3" }
+>> 	{ "i"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the general force field parameter set.
+>> #
+>> gaff = loadamberparams gaff.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+(UNKNOWN ATOM TYPE: oq)
+(UNKNOWN ATOM TYPE: ni)
+(UNKNOWN ATOM TYPE: nj)
+(UNKNOWN ATOM TYPE: nk)
+(UNKNOWN ATOM TYPE: nl)
+(UNKNOWN ATOM TYPE: nm)
+(UNKNOWN ATOM TYPE: nn)
+(UNKNOWN ATOM TYPE: sp)
+(UNKNOWN ATOM TYPE: sq)
+> 
+> mol_0 = loadPdb 1OAO_s.pdb
+Loading PDB file: ./1OAO_s.pdb
+Matching PDB residue names to LEaP variables.
+Mapped residue MET, term: Terminal/beginning, seq. number: 0 to: NMET.
+Mapped residue MET, term: Terminal/last, seq. number: 728 to: CMET.
+  total atoms in file: 11469
+> 
+> translate mol_0 { 0.0 0.0 0.0 }
+> sys = combine { mol_0  }
+  Sequence: default_name
+> check sys
+Checking 'sys'....
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485454 angstroms between .R<ILE 728>.A<H 2> and .R<ILE 728>.A<HG13 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485650 angstroms between .R<CYS 597>.A<H 2> and .R<GLY 596>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.244786 angstroms between .R<GLN 581>.A<HE22 15> and .R<ASN 568>.A<HD21 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.405924 angstroms between .R<LEU 579>.A<H 2> and .R<SER 575>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.217240 angstroms between .R<ARG 440>.A<HG3 10> and .R<ARG 440>.A<HH11 18>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.160590 angstroms between .R<ASN 424>.A<H 2> and .R<ASN 424>.A<HD22 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.450679 angstroms between .R<GLU 360>.A<H 2> and .R<SER 357>.A<O 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.214338 angstroms between .R<ARG 346>.A<H 2> and .R<ARG 346>.A<HG2 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.386448 angstroms between .R<THR 308>.A<HG1 12> and .R<PHE 293>.A<HZ 14>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 0.854857 angstroms between .R<THR 278>.A<HG1 12> and .R<HIE 258>.A<HE2 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.488268 angstroms between .R<ALA 264>.A<HB2 7> and .R<THR 106>.A<HG1 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.489771 angstroms between .R<LEU 223>.A<HB3 7> and .R<CYS 67>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.366290 angstroms between .R<ASN 211>.A<HD22 12> and .R<ASP 187>.A<HA 4>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.019942 angstroms between .R<GLN 192>.A<HE21 14> and .R<ALA 163>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.487905 angstroms between .R<GLN 192>.A<HE22 15> and .R<ALA 189>.A<HA 4>
+Checking parameters for unit 'sys'.
+Checking for bond parameters.
+Checking for angle parameters.
+check:  Warnings: 16
+Unit is OK.
+> #savepdb mol_0 1OAO_leap.pdb 
+> saveAmberParm sys system.top system.mdcrd
+Checking Unit.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Note.
+Ignoring the warning from Unit Checking.
+
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ total 2279 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CMET	1
+	NMET	1
+  )
+ (no restraints)
+> quit
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 17; Notes = 1.
+log started: Mon Jun 28 14:28:28 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the ff14SBonlysc (ff14SB only side chain) force field
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #    Uses frcmod.ff14SB + frcmod.ff99SB14 for proteins
+>> #       = ff99SB backbone + ff14SB side chains;
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "C8"  "C" "sp3" }
+>> 	{ "2C"  "C" "sp3" }
+>> 	{ "3C"  "C" "sp3" }
+>> 	{ "CH"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "CO"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CJ"  "C" "sp2" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NP"  "N" "sp2" }
+>> 	{ "NQ"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> parm10 = loadamberparams parm10.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+(UNKNOWN ATOM TYPE: Zn)
+(UNKNOWN ATOM TYPE: EP)
+>> frcmod14SB = loadamberparams frcmod.ff14SB
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+>> frcmod99SBbb = loadamberparams frcmod.ff99SB14
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff99SB14
+Reading force field modification type file (frcmod)
+Reading title:
+ff99SB backbone parameters (Hornak & Simmerling) with ff14SB atom types
+>> #
+>> #	Load main chain and terminating amino acid libraries, nucleic acids
+>> #
+>> loadOff amino12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/amino12.lib
+Loading: ALA
+Loading: ARG
+Loading: ASH
+Loading: ASN
+Loading: ASP
+Loading: CYM
+Loading: CYS
+Loading: CYX
+Loading: GLH
+Loading: GLN
+Loading: GLU
+Loading: GLY
+Loading: HID
+Loading: HIE
+Loading: HIP
+Loading: HYP
+Loading: ILE
+Loading: LEU
+Loading: LYN
+Loading: LYS
+Loading: MET
+Loading: PHE
+Loading: PRO
+Loading: SER
+Loading: THR
+Loading: TRP
+Loading: TYR
+Loading: VAL
+>> loadOff aminoct12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminoct12.lib
+Loading: CALA
+Loading: CARG
+Loading: CASN
+Loading: CASP
+Loading: CCYS
+Loading: CCYX
+Loading: CGLN
+Loading: CGLU
+Loading: CGLY
+Loading: CHID
+Loading: CHIE
+Loading: CHIP
+Loading: CHYP
+Loading: CILE
+Loading: CLEU
+Loading: CLYS
+Loading: CMET
+Loading: CPHE
+Loading: CPRO
+Loading: CSER
+Loading: CTHR
+Loading: CTRP
+Loading: CTYR
+Loading: CVAL
+Loading: NHE
+Loading: NME
+>> loadOff aminont12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminont12.lib
+Loading: ACE
+Loading: NALA
+Loading: NARG
+Loading: NASN
+Loading: NASP
+Loading: NCYS
+Loading: NCYX
+Loading: NGLN
+Loading: NGLU
+Loading: NGLY
+Loading: NHID
+Loading: NHIE
+Loading: NHIP
+Loading: NILE
+Loading: NLEU
+Loading: NLYS
+Loading: NMET
+Loading: NPHE
+Loading: NPRO
+Loading: NSER
+Loading: NTHR
+Loading: NTRP
+Loading: NTYR
+Loading: NVAL
+>> 
+>> #
+>> #	Define the PDB name map for the amino acids and nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "HYP" "NHYP" } { 1 "HYP" "CHYP" }
+>>   { 0 "ALA" "NALA" } { 1 "ALA" "CALA" }
+>>   { 0 "ARG" "NARG" } { 1 "ARG" "CARG" }
+>>   { 0 "ASN" "NASN" } { 1 "ASN" "CASN" }
+>>   { 0 "ASP" "NASP" } { 1 "ASP" "CASP" }
+>>   { 0 "CYS" "NCYS" } { 1 "CYS" "CCYS" }
+>>   { 0 "CYX" "NCYX" } { 1 "CYX" "CCYX" }
+>>   { 0 "GLN" "NGLN" } { 1 "GLN" "CGLN" }
+>>   { 0 "GLU" "NGLU" } { 1 "GLU" "CGLU" }
+>>   { 0 "GLY" "NGLY" } { 1 "GLY" "CGLY" }
+>>   { 0 "HID" "NHID" } { 1 "HID" "CHID" }
+>>   { 0 "HIE" "NHIE" } { 1 "HIE" "CHIE" }
+>>   { 0 "HIP" "NHIP" } { 1 "HIP" "CHIP" }
+>>   { 0 "ILE" "NILE" } { 1 "ILE" "CILE" }
+>>   { 0 "LEU" "NLEU" } { 1 "LEU" "CLEU" }
+>>   { 0 "LYS" "NLYS" } { 1 "LYS" "CLYS" }
+>>   { 0 "MET" "NMET" } { 1 "MET" "CMET" }
+>>   { 0 "PHE" "NPHE" } { 1 "PHE" "CPHE" }
+>>   { 0 "PRO" "NPRO" } { 1 "PRO" "CPRO" }
+>>   { 0 "SER" "NSER" } { 1 "SER" "CSER" }
+>>   { 0 "THR" "NTHR" } { 1 "THR" "CTHR" }
+>>   { 0 "TRP" "NTRP" } { 1 "TRP" "CTRP" }
+>>   { 0 "TYR" "NTYR" } { 1 "TYR" "CTYR" }
+>>   { 0 "VAL" "NVAL" } { 1 "VAL" "CVAL" }
+>>   { 0 "HIS" "NHIS" } { 1 "HIS" "CHIS" }
+>> }
+>> 
+>> #
+>> # assume that most often proteins use HIE
+>> #
+>> NHIS = NHIE
+>> HIS = HIE
+>> CHIS = CHIE
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #   Uses ff99bsc0+bsc1 for DNA
+>> #               (ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #               (bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #               (bsc1): Ivani et al. Nature Methods 13: 55, 2016
+>> #   load atom type hybridizations
+>> #
+>> addAtomTypes {
+>>     { "H"   "H" "sp3" }
+>>     { "HO"  "H" "sp3" }
+>>     { "HS"  "H" "sp3" }
+>>     { "H1"  "H" "sp3" }
+>>     { "H2"  "H" "sp3" }
+>>     { "H3"  "H" "sp3" }
+>>     { "H4"  "H" "sp3" }
+>>     { "H5"  "H" "sp3" }
+>>     { "HW"  "H" "sp3" }
+>>     { "HC"  "H" "sp3" }
+>>     { "HA"  "H" "sp3" }
+>>     { "HP"  "H" "sp3" }
+>>     { "HZ"  "H" "sp3" }
+>>     { "OH"  "O" "sp3" }
+>>     { "OS"  "O" "sp3" }
+>>     { "O"   "O" "sp2" }
+>>     { "O2"  "O" "sp2" }
+>>     { "OP"  "O" "sp2" }
+>>     { "OW"  "O" "sp3" }
+>>     { "CT"  "C" "sp3" }
+>>     { "CX"  "C" "sp3" }
+>>     { "C8"  "C" "sp3" }
+>>     { "2C"  "C" "sp3" }
+>>     { "3C"  "C" "sp3" }
+>>     { "CH"  "C" "sp3" }
+>>     { "CS"  "C" "sp2" }
+>>     { "C"   "C" "sp2" }
+>>     { "CO"  "C" "sp2" }
+>>     { "C*"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CB"  "C" "sp2" }
+>>     { "CC"  "C" "sp2" }
+>>     { "CN"  "C" "sp2" }
+>>     { "CM"  "C" "sp2" }
+>>     { "CK"  "C" "sp2" }
+>>     { "CQ"  "C" "sp2" }
+>>     { "CD"  "C" "sp2" }
+>>     { "C5"  "C" "sp2" }
+>>     { "C4"  "C" "sp2" }
+>>     { "CP"  "C" "sp2" }
+>>     { "CI"  "C" "sp3" }
+>>     { "CJ"  "C" "sp2" }
+>>     { "CW"  "C" "sp2" }
+>>     { "CV"  "C" "sp2" }
+>>     { "CR"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CY"  "C" "sp2" }
+>>     { "C0"  "Ca" "sp3" }
+>>     { "MG"  "Mg" "sp3" }
+>>     { "N"   "N" "sp2" }
+>>     { "NA"  "N" "sp2" }
+>>     { "N2"  "N" "sp2" }
+>>     { "N*"  "N" "sp2" }
+>>     { "NP"  "N" "sp2" }
+>>     { "NQ"  "N" "sp2" }
+>>     { "NB"  "N" "sp2" }
+>>     { "NC"  "N" "sp2" }
+>>     { "NT"  "N" "sp3" }
+>>     { "NY"  "N" "sp2" }
+>>     { "N3"  "N" "sp3" }
+>>     { "S"   "S" "sp3" }
+>>     { "SH"  "S" "sp3" }
+>>     { "P"   "P" "sp3" }
+>>     { "LP"  ""  "sp3" }
+>>     { "EP"  ""  "sp3" }
+>>     { "F"   "F" "sp3" }
+>>     { "Cl"  "Cl" "sp3" }
+>>     { "Br"  "Br" "sp3" }
+>>     { "I"   "I"  "sp3" }
+>>     { "F-"   "F" "sp3" }
+>>     { "Cl-"  "Cl" "sp3" }
+>>     { "Br-"  "Br" "sp3" }
+>>     { "I-"   "I"  "sp3" }
+>>     { "Li+"  "Li"  "sp3" }
+>>     { "Na+"  "Na"  "sp3" }
+>>     { "K+"  "K"  "sp3" }
+>>     { "Rb+"  "Rb"  "sp3" }
+>>     { "Cs+"  "Cs"  "sp3" }
+>>     { "Mg+"  "Mg"  "sp3" }
+>> }
+>> #
+>> #   Load nucleic acids
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> 
+>> addPdbResMap {
+>>   { 0 "DG" "DG5"  } { 1 "DG" "DG3"  }  
+>>   { 0 "DA" "DA5"  } { 1 "DA" "DA3"  }  
+>>   { 0 "DC" "DC5"  } { 1 "DC" "DC3"  }  
+>>   { 0 "DT" "DT5"  } { 1 "DT" "DT3"  }  
+>> #  some really old Amber residue names, assuming DNA:
+>>   { 0 "GUA" "DG5"  } { 1 "GUA" "DG3"  } { "GUA" "DG" }
+>>   { 0 "ADE" "DA5"  } { 1 "ADE" "DA3"  } { "ADE" "DA" }
+>>   { 0 "CYT" "DC5"  } { 1 "CYT" "DC3"  } { "CYT" "DC" }
+>>   { 0 "THY" "DT5"  } { 1 "THY" "DT3"  } { "THY" "DT" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "'H2'" "H2''" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "'H5'" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>> }
+>> 
+>> #
+>> # Load parameters for BSC1
+>> #
+>> addAtomTypes {
+>>   { "C1" "C" "sp2" }
+>>   { "C2" "C" "sp2" }
+>>   { "CI" "C" "sp3" }
+>>   { "CE" "C" "sp3" }
+>>  }
+>> 
+>> loadoff parmBSC1.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/parmBSC1.lib
+Loading: DA
+Loading: DA3
+Loading: DA5
+Loading: DAN
+Loading: DC
+Loading: DC3
+Loading: DC5
+Loading: DCN
+Loading: DG
+Loading: DG3
+Loading: DG5
+Loading: DGN
+Loading: DT
+Loading: DT3
+Loading: DT5
+Loading: DTN
+>> loadamberparams frcmod.parmbsc1
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.parmbsc1
+Reading force field modification type file (frcmod)
+Reading title:
+Parmbsc1 force-field for DNA
+>> 
+>> ############
+>> # RNA ######
+>> # ##########
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #       Uses ff99bsc0_chiOL3 for RNA
+>> #       	(ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #       	(bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #       	(chiOL3): Zgarbova et al. JCTC 7: 2886, 2011
+>> #           (note: all of the above are in parm10.dat, loaded below)
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> #
+>> #	Load main chain and terminating nucleic acids
+>> #
+>> 
+>> loadOff RNA.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/RNA.lib
+Loading: A
+Loading: A3
+Loading: A5
+Loading: AN
+Loading: C
+Loading: C3
+Loading: C5
+Loading: CN
+Loading: G
+Loading: G3
+Loading: G5
+Loading: GN
+Loading: OHE
+Loading: U
+Loading: U3
+Loading: U5
+Loading: UN
+>> 
+>> #
+>> #	Define the PDB name map for the nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "G" "G5"  } { 1 "G" "G3"  } 
+>>   { 0 "A" "A5"  } { 1 "A" "A3"  } 
+>>   { 0 "C" "C5"  } { 1 "C" "C3"  } 
+>>   { 0 "U" "U5"  } { 1 "U" "U3"  } 
+>> #  some old Amber residue names for RNA:
+>>   { 0  "RA5" "A5" } { 1 "RA3" "A3"} {"RA" "A" }
+>>   { 0  "RC5" "C5" } { 1 "RC3" "C3"} {"RC" "C" }
+>>   { 0  "RG5" "G5" } { 1 "RG3" "G3"} {"RG" "G" }
+>>   { 0  "RU5" "U5" } { 1 "RU3" "U3"} {"RU" "U" }
+>> #  uncomment out the following if you have this old style RNA files:
+>> # { 0 "GUA" "G5"  } { 1 "GUA" "G3"  } { "GUA" "G" }
+>> # { 0 "ADE" "A5"  } { 1 "ADE" "A3"  } { "ADE" "A" }
+>> # { 0 "CYT" "C5"  } { 1 "CYT" "C3"  } { "CYT" "C" }
+>> # { 0 "URA" "R5"  } { 1 "URA" "R3"  } { "URA" "R" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>>   { "O3P" "OP3" }
+>> }
+Substituting map O5* -> O5'  for  O5* -> O5'
+Substituting map C5* -> C5'  for  C5* -> C5'
+Substituting map C4* -> C4'  for  C4* -> C4'
+Substituting map O4* -> O4'  for  O4* -> O4'
+Substituting map C3* -> C3'  for  C3* -> C3'
+Substituting map O3* -> O3'  for  O3* -> O3'
+Substituting map C2* -> C2'  for  C2* -> C2'
+Substituting map O2* -> O2'  for  O2* -> O2'
+Substituting map C1* -> C1'  for  C1* -> C1'
+Substituting map C5M -> C7  for  C5M -> C7
+Substituting map H1* -> H1'  for  H1* -> H1'
+Substituting map H2*1 -> H2'  for  H2*1 -> H2'
+Substituting map H2*2 -> H2''  for  H2*2 -> H2''
+Substituting map H2'1 -> H2'  for  H2'1 -> H2'
+Substituting map H2'2 -> H2''  for  H2'2 -> H2''
+Substituting map H3* -> H3'  for  H3* -> H3'
+Substituting map H4* -> H4'  for  H4* -> H4'
+Substituting map H5*1 -> H5'  for  H5*1 -> H5'
+Substituting map H5*2 -> H5''  for  H5*2 -> H5''
+Substituting map H5'1 -> H5'  for  H5'1 -> H5'
+Substituting map H5'2 -> H5''  for  H5'2 -> H5''
+Substituting map HO'2 -> HO2'  for  HO'2 -> HO2'
+Substituting map H5T -> HO5'  for  H5T -> HO5'
+Substituting map H3T -> HO3'  for  H3T -> HO3'
+Substituting map O1' -> O4'  for  O1' -> O4'
+Substituting map OA -> OP1  for  OA -> OP1
+Substituting map OB -> OP2  for  OB -> OP2
+Substituting map O1P -> OP1  for  O1P -> OP1
+Substituting map O2P -> OP2  for  O2P -> OP2
+>> 
+> 
+> source leaprc.gaff
+----- Source: /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff
+----- Source of /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff done
+>> logFile leap.log
+log started: Mon Jun 28 14:28:28 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the general Amber Force field.
+>> #       This file is mostly for use with Antechamber
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "h1"  "H" "sp3" }
+>> 	{ "h2"  "H" "sp3" }
+>> 	{ "h3"  "H" "sp3" }
+>> 	{ "h4"  "H" "sp3" }
+>> 	{ "h5"  "H" "sp3" }
+>> 	{ "ha"  "H" "sp3" }
+>> 	{ "hc"  "H" "sp3" }
+>> 	{ "hn"  "H" "sp3" }
+>> 	{ "ho"  "H" "sp3" }
+>> 	{ "hp"  "H" "sp3" }
+>> 	{ "hs"  "H" "sp3" }
+>> 	{ "hw"  "H" "sp3" }
+>> 	{ "hx"  "H" "sp3" }
+>> 	{ "o"  "O" "sp2" }
+>> 	{ "o2"  "O" "sp2" }
+>> 	{ "oh"  "O" "sp3" }
+>> 	{ "os"  "O" "sp3" }
+>> 	{ "ow"  "O" "sp3" }
+>> 	{ "c"  "C" "sp2" }
+>> 	{ "c1"  "C" "sp2" }
+>> 	{ "c2"  "C" "sp2" }
+>> 	{ "c3"  "C" "sp3" }
+>> 	{ "ca"  "C" "sp2" }
+>> 	{ "cc"  "C" "sp2" }
+>> 	{ "cd"  "C" "sp2" }
+>> 	{ "ce"  "C" "sp2" }
+>> 	{ "cf"  "C" "sp2" }
+>> 	{ "cg"  "C" "sp2" }
+>> 	{ "ch"  "C" "sp2" }
+>> 	{ "cp"  "C" "sp2" }
+>> 	{ "cq"  "C" "sp2" }
+>> 	{ "cu"  "C" "sp2" }
+>> 	{ "cv"  "C" "sp2" }
+>> 	{ "cx"  "C" "sp2" }
+>> 	{ "cy"  "C" "sp2" }
+>> 	{ "cz"  "C" "sp2" }
+>> 	{ "n"   "N" "sp2" }
+>> 	{ "n1"  "N" "sp2" }
+>> 	{ "n2"  "N" "sp2" }
+>> 	{ "n3"  "N" "sp3" }
+>> 	{ "n4"  "N" "sp3" }
+>> 	{ "na"  "N" "sp2" }
+>> 	{ "nb"  "N" "sp2" }
+>> 	{ "nc"  "N" "sp2" }
+>> 	{ "nd"  "N" "sp2" }
+>> 	{ "ne"  "N" "sp2" }
+>> 	{ "nf"  "N" "sp2" }
+>> 	{ "nh"  "N" "sp2" }
+>> 	{ "no"  "N" "sp2" }
+>> 	{ "s"   "S" "sp2" }
+>> 	{ "s2"   "S" "sp2" }
+>> 	{ "s3"   "S" "sp3" }
+>> 	{ "s4"   "S" "sp3" }
+>> 	{ "s6"   "S" "sp3" }
+>> 	{ "sh"   "S" "sp3" }
+>> 	{ "ss"   "S" "sp3" }
+>> 	{ "sx"   "S" "sp3" }
+>> 	{ "sy"   "S" "sp3" }
+>> 	{ "p2"   "P" "sp2" }
+>> 	{ "p3"   "P" "sp3" }
+>> 	{ "p4"   "P" "sp3" }
+>> 	{ "p5"   "P" "sp3" }
+>> 	{ "pb"   "P" "sp3" }
+>> 	{ "pc"   "P" "sp3" }
+>> 	{ "pd"   "P" "sp3" }
+>> 	{ "pe"   "P" "sp3" }
+>> 	{ "pf"   "P" "sp3" }
+>> 	{ "px"   "P" "sp3" }
+>> 	{ "py"   "P" "sp3" }
+>> 	{ "f"   "F" "sp3" }
+>> 	{ "cl"  "Cl" "sp3" }
+>> 	{ "br"  "Br" "sp3" }
+>> 	{ "i"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the general force field parameter set.
+>> #
+>> gaff = loadamberparams gaff.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+(UNKNOWN ATOM TYPE: oq)
+(UNKNOWN ATOM TYPE: ni)
+(UNKNOWN ATOM TYPE: nj)
+(UNKNOWN ATOM TYPE: nk)
+(UNKNOWN ATOM TYPE: nl)
+(UNKNOWN ATOM TYPE: nm)
+(UNKNOWN ATOM TYPE: nn)
+(UNKNOWN ATOM TYPE: sp)
+(UNKNOWN ATOM TYPE: sq)
+> 
+> mol_0 = loadPdb 1OAO_s.pdb
+Loading PDB file: ./1OAO_s.pdb
+Matching PDB residue names to LEaP variables.
+Mapped residue MET, term: Terminal/beginning, seq. number: 0 to: NMET.
+Mapped residue MET, term: Terminal/last, seq. number: 728 to: CMET.
+  total atoms in file: 11469
+> 
+> translate mol_0 { 0.0 0.0 0.0 }
+> sys = combine { mol_0  }
+  Sequence: default_name
+> check sys
+Checking 'sys'....
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485454 angstroms between .R<ILE 728>.A<H 2> and .R<ILE 728>.A<HG13 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485650 angstroms between .R<CYS 597>.A<H 2> and .R<GLY 596>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.244786 angstroms between .R<GLN 581>.A<HE22 15> and .R<ASN 568>.A<HD21 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.405924 angstroms between .R<LEU 579>.A<H 2> and .R<SER 575>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.217240 angstroms between .R<ARG 440>.A<HG3 10> and .R<ARG 440>.A<HH11 18>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.160590 angstroms between .R<ASN 424>.A<H 2> and .R<ASN 424>.A<HD22 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.450679 angstroms between .R<GLU 360>.A<H 2> and .R<SER 357>.A<O 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.214338 angstroms between .R<ARG 346>.A<H 2> and .R<ARG 346>.A<HG2 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.386448 angstroms between .R<THR 308>.A<HG1 12> and .R<PHE 293>.A<HZ 14>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 0.854857 angstroms between .R<THR 278>.A<HG1 12> and .R<HIE 258>.A<HE2 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.488268 angstroms between .R<ALA 264>.A<HB2 7> and .R<THR 106>.A<HG1 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.489771 angstroms between .R<LEU 223>.A<HB3 7> and .R<CYS 67>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.366290 angstroms between .R<ASN 211>.A<HD22 12> and .R<ASP 187>.A<HA 4>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.019942 angstroms between .R<GLN 192>.A<HE21 14> and .R<ALA 163>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.487905 angstroms between .R<GLN 192>.A<HE22 15> and .R<ALA 189>.A<HA 4>
+Checking parameters for unit 'sys'.
+Checking for bond parameters.
+Checking for angle parameters.
+check:  Warnings: 16
+Unit is OK.
+> #savepdb mol_0 1OAO_leap.pdb 
+> saveAmberParm sys system.top system.mdcrd
+Checking Unit.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Note.
+Ignoring the warning from Unit Checking.
+
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ total 2279 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CMET	1
+	NMET	1
+  )
+ (no restraints)
+> quit
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 17; Notes = 1.
+log started: Mon Jun 28 15:10:27 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the ff14SBonlysc (ff14SB only side chain) force field
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #    Uses frcmod.ff14SB + frcmod.ff99SB14 for proteins
+>> #       = ff99SB backbone + ff14SB side chains;
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "C8"  "C" "sp3" }
+>> 	{ "2C"  "C" "sp3" }
+>> 	{ "3C"  "C" "sp3" }
+>> 	{ "CH"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "CO"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CJ"  "C" "sp2" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NP"  "N" "sp2" }
+>> 	{ "NQ"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> parm10 = loadamberparams parm10.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+(UNKNOWN ATOM TYPE: Zn)
+(UNKNOWN ATOM TYPE: EP)
+>> frcmod14SB = loadamberparams frcmod.ff14SB
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+>> frcmod99SBbb = loadamberparams frcmod.ff99SB14
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff99SB14
+Reading force field modification type file (frcmod)
+Reading title:
+ff99SB backbone parameters (Hornak & Simmerling) with ff14SB atom types
+>> #
+>> #	Load main chain and terminating amino acid libraries, nucleic acids
+>> #
+>> loadOff amino12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/amino12.lib
+Loading: ALA
+Loading: ARG
+Loading: ASH
+Loading: ASN
+Loading: ASP
+Loading: CYM
+Loading: CYS
+Loading: CYX
+Loading: GLH
+Loading: GLN
+Loading: GLU
+Loading: GLY
+Loading: HID
+Loading: HIE
+Loading: HIP
+Loading: HYP
+Loading: ILE
+Loading: LEU
+Loading: LYN
+Loading: LYS
+Loading: MET
+Loading: PHE
+Loading: PRO
+Loading: SER
+Loading: THR
+Loading: TRP
+Loading: TYR
+Loading: VAL
+>> loadOff aminoct12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminoct12.lib
+Loading: CALA
+Loading: CARG
+Loading: CASN
+Loading: CASP
+Loading: CCYS
+Loading: CCYX
+Loading: CGLN
+Loading: CGLU
+Loading: CGLY
+Loading: CHID
+Loading: CHIE
+Loading: CHIP
+Loading: CHYP
+Loading: CILE
+Loading: CLEU
+Loading: CLYS
+Loading: CMET
+Loading: CPHE
+Loading: CPRO
+Loading: CSER
+Loading: CTHR
+Loading: CTRP
+Loading: CTYR
+Loading: CVAL
+Loading: NHE
+Loading: NME
+>> loadOff aminont12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminont12.lib
+Loading: ACE
+Loading: NALA
+Loading: NARG
+Loading: NASN
+Loading: NASP
+Loading: NCYS
+Loading: NCYX
+Loading: NGLN
+Loading: NGLU
+Loading: NGLY
+Loading: NHID
+Loading: NHIE
+Loading: NHIP
+Loading: NILE
+Loading: NLEU
+Loading: NLYS
+Loading: NMET
+Loading: NPHE
+Loading: NPRO
+Loading: NSER
+Loading: NTHR
+Loading: NTRP
+Loading: NTYR
+Loading: NVAL
+>> 
+>> #
+>> #	Define the PDB name map for the amino acids and nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "HYP" "NHYP" } { 1 "HYP" "CHYP" }
+>>   { 0 "ALA" "NALA" } { 1 "ALA" "CALA" }
+>>   { 0 "ARG" "NARG" } { 1 "ARG" "CARG" }
+>>   { 0 "ASN" "NASN" } { 1 "ASN" "CASN" }
+>>   { 0 "ASP" "NASP" } { 1 "ASP" "CASP" }
+>>   { 0 "CYS" "NCYS" } { 1 "CYS" "CCYS" }
+>>   { 0 "CYX" "NCYX" } { 1 "CYX" "CCYX" }
+>>   { 0 "GLN" "NGLN" } { 1 "GLN" "CGLN" }
+>>   { 0 "GLU" "NGLU" } { 1 "GLU" "CGLU" }
+>>   { 0 "GLY" "NGLY" } { 1 "GLY" "CGLY" }
+>>   { 0 "HID" "NHID" } { 1 "HID" "CHID" }
+>>   { 0 "HIE" "NHIE" } { 1 "HIE" "CHIE" }
+>>   { 0 "HIP" "NHIP" } { 1 "HIP" "CHIP" }
+>>   { 0 "ILE" "NILE" } { 1 "ILE" "CILE" }
+>>   { 0 "LEU" "NLEU" } { 1 "LEU" "CLEU" }
+>>   { 0 "LYS" "NLYS" } { 1 "LYS" "CLYS" }
+>>   { 0 "MET" "NMET" } { 1 "MET" "CMET" }
+>>   { 0 "PHE" "NPHE" } { 1 "PHE" "CPHE" }
+>>   { 0 "PRO" "NPRO" } { 1 "PRO" "CPRO" }
+>>   { 0 "SER" "NSER" } { 1 "SER" "CSER" }
+>>   { 0 "THR" "NTHR" } { 1 "THR" "CTHR" }
+>>   { 0 "TRP" "NTRP" } { 1 "TRP" "CTRP" }
+>>   { 0 "TYR" "NTYR" } { 1 "TYR" "CTYR" }
+>>   { 0 "VAL" "NVAL" } { 1 "VAL" "CVAL" }
+>>   { 0 "HIS" "NHIS" } { 1 "HIS" "CHIS" }
+>> }
+>> 
+>> #
+>> # assume that most often proteins use HIE
+>> #
+>> NHIS = NHIE
+>> HIS = HIE
+>> CHIS = CHIE
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #   Uses ff99bsc0+bsc1 for DNA
+>> #               (ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #               (bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #               (bsc1): Ivani et al. Nature Methods 13: 55, 2016
+>> #   load atom type hybridizations
+>> #
+>> addAtomTypes {
+>>     { "H"   "H" "sp3" }
+>>     { "HO"  "H" "sp3" }
+>>     { "HS"  "H" "sp3" }
+>>     { "H1"  "H" "sp3" }
+>>     { "H2"  "H" "sp3" }
+>>     { "H3"  "H" "sp3" }
+>>     { "H4"  "H" "sp3" }
+>>     { "H5"  "H" "sp3" }
+>>     { "HW"  "H" "sp3" }
+>>     { "HC"  "H" "sp3" }
+>>     { "HA"  "H" "sp3" }
+>>     { "HP"  "H" "sp3" }
+>>     { "HZ"  "H" "sp3" }
+>>     { "OH"  "O" "sp3" }
+>>     { "OS"  "O" "sp3" }
+>>     { "O"   "O" "sp2" }
+>>     { "O2"  "O" "sp2" }
+>>     { "OP"  "O" "sp2" }
+>>     { "OW"  "O" "sp3" }
+>>     { "CT"  "C" "sp3" }
+>>     { "CX"  "C" "sp3" }
+>>     { "C8"  "C" "sp3" }
+>>     { "2C"  "C" "sp3" }
+>>     { "3C"  "C" "sp3" }
+>>     { "CH"  "C" "sp3" }
+>>     { "CS"  "C" "sp2" }
+>>     { "C"   "C" "sp2" }
+>>     { "CO"  "C" "sp2" }
+>>     { "C*"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CB"  "C" "sp2" }
+>>     { "CC"  "C" "sp2" }
+>>     { "CN"  "C" "sp2" }
+>>     { "CM"  "C" "sp2" }
+>>     { "CK"  "C" "sp2" }
+>>     { "CQ"  "C" "sp2" }
+>>     { "CD"  "C" "sp2" }
+>>     { "C5"  "C" "sp2" }
+>>     { "C4"  "C" "sp2" }
+>>     { "CP"  "C" "sp2" }
+>>     { "CI"  "C" "sp3" }
+>>     { "CJ"  "C" "sp2" }
+>>     { "CW"  "C" "sp2" }
+>>     { "CV"  "C" "sp2" }
+>>     { "CR"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CY"  "C" "sp2" }
+>>     { "C0"  "Ca" "sp3" }
+>>     { "MG"  "Mg" "sp3" }
+>>     { "N"   "N" "sp2" }
+>>     { "NA"  "N" "sp2" }
+>>     { "N2"  "N" "sp2" }
+>>     { "N*"  "N" "sp2" }
+>>     { "NP"  "N" "sp2" }
+>>     { "NQ"  "N" "sp2" }
+>>     { "NB"  "N" "sp2" }
+>>     { "NC"  "N" "sp2" }
+>>     { "NT"  "N" "sp3" }
+>>     { "NY"  "N" "sp2" }
+>>     { "N3"  "N" "sp3" }
+>>     { "S"   "S" "sp3" }
+>>     { "SH"  "S" "sp3" }
+>>     { "P"   "P" "sp3" }
+>>     { "LP"  ""  "sp3" }
+>>     { "EP"  ""  "sp3" }
+>>     { "F"   "F" "sp3" }
+>>     { "Cl"  "Cl" "sp3" }
+>>     { "Br"  "Br" "sp3" }
+>>     { "I"   "I"  "sp3" }
+>>     { "F-"   "F" "sp3" }
+>>     { "Cl-"  "Cl" "sp3" }
+>>     { "Br-"  "Br" "sp3" }
+>>     { "I-"   "I"  "sp3" }
+>>     { "Li+"  "Li"  "sp3" }
+>>     { "Na+"  "Na"  "sp3" }
+>>     { "K+"  "K"  "sp3" }
+>>     { "Rb+"  "Rb"  "sp3" }
+>>     { "Cs+"  "Cs"  "sp3" }
+>>     { "Mg+"  "Mg"  "sp3" }
+>> }
+>> #
+>> #   Load nucleic acids
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> 
+>> addPdbResMap {
+>>   { 0 "DG" "DG5"  } { 1 "DG" "DG3"  }  
+>>   { 0 "DA" "DA5"  } { 1 "DA" "DA3"  }  
+>>   { 0 "DC" "DC5"  } { 1 "DC" "DC3"  }  
+>>   { 0 "DT" "DT5"  } { 1 "DT" "DT3"  }  
+>> #  some really old Amber residue names, assuming DNA:
+>>   { 0 "GUA" "DG5"  } { 1 "GUA" "DG3"  } { "GUA" "DG" }
+>>   { 0 "ADE" "DA5"  } { 1 "ADE" "DA3"  } { "ADE" "DA" }
+>>   { 0 "CYT" "DC5"  } { 1 "CYT" "DC3"  } { "CYT" "DC" }
+>>   { 0 "THY" "DT5"  } { 1 "THY" "DT3"  } { "THY" "DT" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "'H2'" "H2''" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "'H5'" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>> }
+>> 
+>> #
+>> # Load parameters for BSC1
+>> #
+>> addAtomTypes {
+>>   { "C1" "C" "sp2" }
+>>   { "C2" "C" "sp2" }
+>>   { "CI" "C" "sp3" }
+>>   { "CE" "C" "sp3" }
+>>  }
+>> 
+>> loadoff parmBSC1.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/parmBSC1.lib
+Loading: DA
+Loading: DA3
+Loading: DA5
+Loading: DAN
+Loading: DC
+Loading: DC3
+Loading: DC5
+Loading: DCN
+Loading: DG
+Loading: DG3
+Loading: DG5
+Loading: DGN
+Loading: DT
+Loading: DT3
+Loading: DT5
+Loading: DTN
+>> loadamberparams frcmod.parmbsc1
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.parmbsc1
+Reading force field modification type file (frcmod)
+Reading title:
+Parmbsc1 force-field for DNA
+>> 
+>> ############
+>> # RNA ######
+>> # ##########
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #       Uses ff99bsc0_chiOL3 for RNA
+>> #       	(ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #       	(bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #       	(chiOL3): Zgarbova et al. JCTC 7: 2886, 2011
+>> #           (note: all of the above are in parm10.dat, loaded below)
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> #
+>> #	Load main chain and terminating nucleic acids
+>> #
+>> 
+>> loadOff RNA.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/RNA.lib
+Loading: A
+Loading: A3
+Loading: A5
+Loading: AN
+Loading: C
+Loading: C3
+Loading: C5
+Loading: CN
+Loading: G
+Loading: G3
+Loading: G5
+Loading: GN
+Loading: OHE
+Loading: U
+Loading: U3
+Loading: U5
+Loading: UN
+>> 
+>> #
+>> #	Define the PDB name map for the nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "G" "G5"  } { 1 "G" "G3"  } 
+>>   { 0 "A" "A5"  } { 1 "A" "A3"  } 
+>>   { 0 "C" "C5"  } { 1 "C" "C3"  } 
+>>   { 0 "U" "U5"  } { 1 "U" "U3"  } 
+>> #  some old Amber residue names for RNA:
+>>   { 0  "RA5" "A5" } { 1 "RA3" "A3"} {"RA" "A" }
+>>   { 0  "RC5" "C5" } { 1 "RC3" "C3"} {"RC" "C" }
+>>   { 0  "RG5" "G5" } { 1 "RG3" "G3"} {"RG" "G" }
+>>   { 0  "RU5" "U5" } { 1 "RU3" "U3"} {"RU" "U" }
+>> #  uncomment out the following if you have this old style RNA files:
+>> # { 0 "GUA" "G5"  } { 1 "GUA" "G3"  } { "GUA" "G" }
+>> # { 0 "ADE" "A5"  } { 1 "ADE" "A3"  } { "ADE" "A" }
+>> # { 0 "CYT" "C5"  } { 1 "CYT" "C3"  } { "CYT" "C" }
+>> # { 0 "URA" "R5"  } { 1 "URA" "R3"  } { "URA" "R" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>>   { "O3P" "OP3" }
+>> }
+Substituting map O5* -> O5'  for  O5* -> O5'
+Substituting map C5* -> C5'  for  C5* -> C5'
+Substituting map C4* -> C4'  for  C4* -> C4'
+Substituting map O4* -> O4'  for  O4* -> O4'
+Substituting map C3* -> C3'  for  C3* -> C3'
+Substituting map O3* -> O3'  for  O3* -> O3'
+Substituting map C2* -> C2'  for  C2* -> C2'
+Substituting map O2* -> O2'  for  O2* -> O2'
+Substituting map C1* -> C1'  for  C1* -> C1'
+Substituting map C5M -> C7  for  C5M -> C7
+Substituting map H1* -> H1'  for  H1* -> H1'
+Substituting map H2*1 -> H2'  for  H2*1 -> H2'
+Substituting map H2*2 -> H2''  for  H2*2 -> H2''
+Substituting map H2'1 -> H2'  for  H2'1 -> H2'
+Substituting map H2'2 -> H2''  for  H2'2 -> H2''
+Substituting map H3* -> H3'  for  H3* -> H3'
+Substituting map H4* -> H4'  for  H4* -> H4'
+Substituting map H5*1 -> H5'  for  H5*1 -> H5'
+Substituting map H5*2 -> H5''  for  H5*2 -> H5''
+Substituting map H5'1 -> H5'  for  H5'1 -> H5'
+Substituting map H5'2 -> H5''  for  H5'2 -> H5''
+Substituting map HO'2 -> HO2'  for  HO'2 -> HO2'
+Substituting map H5T -> HO5'  for  H5T -> HO5'
+Substituting map H3T -> HO3'  for  H3T -> HO3'
+Substituting map O1' -> O4'  for  O1' -> O4'
+Substituting map OA -> OP1  for  OA -> OP1
+Substituting map OB -> OP2  for  OB -> OP2
+Substituting map O1P -> OP1  for  O1P -> OP1
+Substituting map O2P -> OP2  for  O2P -> OP2
+>> 
+> 
+> source leaprc.gaff
+----- Source: /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff
+----- Source of /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff done
+>> logFile leap.log
+log started: Mon Jun 28 15:10:27 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the general Amber Force field.
+>> #       This file is mostly for use with Antechamber
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "h1"  "H" "sp3" }
+>> 	{ "h2"  "H" "sp3" }
+>> 	{ "h3"  "H" "sp3" }
+>> 	{ "h4"  "H" "sp3" }
+>> 	{ "h5"  "H" "sp3" }
+>> 	{ "ha"  "H" "sp3" }
+>> 	{ "hc"  "H" "sp3" }
+>> 	{ "hn"  "H" "sp3" }
+>> 	{ "ho"  "H" "sp3" }
+>> 	{ "hp"  "H" "sp3" }
+>> 	{ "hs"  "H" "sp3" }
+>> 	{ "hw"  "H" "sp3" }
+>> 	{ "hx"  "H" "sp3" }
+>> 	{ "o"  "O" "sp2" }
+>> 	{ "o2"  "O" "sp2" }
+>> 	{ "oh"  "O" "sp3" }
+>> 	{ "os"  "O" "sp3" }
+>> 	{ "ow"  "O" "sp3" }
+>> 	{ "c"  "C" "sp2" }
+>> 	{ "c1"  "C" "sp2" }
+>> 	{ "c2"  "C" "sp2" }
+>> 	{ "c3"  "C" "sp3" }
+>> 	{ "ca"  "C" "sp2" }
+>> 	{ "cc"  "C" "sp2" }
+>> 	{ "cd"  "C" "sp2" }
+>> 	{ "ce"  "C" "sp2" }
+>> 	{ "cf"  "C" "sp2" }
+>> 	{ "cg"  "C" "sp2" }
+>> 	{ "ch"  "C" "sp2" }
+>> 	{ "cp"  "C" "sp2" }
+>> 	{ "cq"  "C" "sp2" }
+>> 	{ "cu"  "C" "sp2" }
+>> 	{ "cv"  "C" "sp2" }
+>> 	{ "cx"  "C" "sp2" }
+>> 	{ "cy"  "C" "sp2" }
+>> 	{ "cz"  "C" "sp2" }
+>> 	{ "n"   "N" "sp2" }
+>> 	{ "n1"  "N" "sp2" }
+>> 	{ "n2"  "N" "sp2" }
+>> 	{ "n3"  "N" "sp3" }
+>> 	{ "n4"  "N" "sp3" }
+>> 	{ "na"  "N" "sp2" }
+>> 	{ "nb"  "N" "sp2" }
+>> 	{ "nc"  "N" "sp2" }
+>> 	{ "nd"  "N" "sp2" }
+>> 	{ "ne"  "N" "sp2" }
+>> 	{ "nf"  "N" "sp2" }
+>> 	{ "nh"  "N" "sp2" }
+>> 	{ "no"  "N" "sp2" }
+>> 	{ "s"   "S" "sp2" }
+>> 	{ "s2"   "S" "sp2" }
+>> 	{ "s3"   "S" "sp3" }
+>> 	{ "s4"   "S" "sp3" }
+>> 	{ "s6"   "S" "sp3" }
+>> 	{ "sh"   "S" "sp3" }
+>> 	{ "ss"   "S" "sp3" }
+>> 	{ "sx"   "S" "sp3" }
+>> 	{ "sy"   "S" "sp3" }
+>> 	{ "p2"   "P" "sp2" }
+>> 	{ "p3"   "P" "sp3" }
+>> 	{ "p4"   "P" "sp3" }
+>> 	{ "p5"   "P" "sp3" }
+>> 	{ "pb"   "P" "sp3" }
+>> 	{ "pc"   "P" "sp3" }
+>> 	{ "pd"   "P" "sp3" }
+>> 	{ "pe"   "P" "sp3" }
+>> 	{ "pf"   "P" "sp3" }
+>> 	{ "px"   "P" "sp3" }
+>> 	{ "py"   "P" "sp3" }
+>> 	{ "f"   "F" "sp3" }
+>> 	{ "cl"  "Cl" "sp3" }
+>> 	{ "br"  "Br" "sp3" }
+>> 	{ "i"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the general force field parameter set.
+>> #
+>> gaff = loadamberparams gaff.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+(UNKNOWN ATOM TYPE: oq)
+(UNKNOWN ATOM TYPE: ni)
+(UNKNOWN ATOM TYPE: nj)
+(UNKNOWN ATOM TYPE: nk)
+(UNKNOWN ATOM TYPE: nl)
+(UNKNOWN ATOM TYPE: nm)
+(UNKNOWN ATOM TYPE: nn)
+(UNKNOWN ATOM TYPE: sp)
+(UNKNOWN ATOM TYPE: sq)
+> 
+> mol_0 = loadPdb 1OAO_t.pdb
+Loading PDB file: ./1OAO_t.pdb
+Matching PDB residue names to LEaP variables.
+Mapped residue THR, term: Terminal/beginning, seq. number: 0 to: NTHR.
+Mapped residue MET, term: Terminal/last, seq. number: 727 to: CMET.
+  total atoms in file: 11452
+> 
+> translate mol_0 { 0.0 0.0 0.0 }
+> sys = combine { mol_0  }
+  Sequence: default_name
+> check sys
+Checking 'sys'....
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.498693 angstroms between .R<GLU 709>.A<OE2 13> and .R<THR 705>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.485846 angstroms between .R<ASP 660>.A<OD2 10> and .R<LEU 586>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.456172 angstroms between .R<CYS 596>.A<H 2> and .R<GLY 595>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.330779 angstroms between .R<CYS 594>.A<HG 9> and .R<CYS 508>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.082008 angstroms between .R<GLN 580>.A<HE22 15> and .R<ASN 567>.A<HD21 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.315393 angstroms between .R<LEU 578>.A<H 2> and .R<SER 574>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.337531 angstroms between .R<SER 565>.A<HG 9> and .R<GLU 553>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.449043 angstroms between .R<ILE 541>.A<HD12 16> and .R<PHE 455>.A<HD2 18>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.464562 angstroms between .R<GLN 463>.A<NE2 13> and .R<THR 361>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.133997 angstroms between .R<GLN 463>.A<HE22 15> and .R<THR 361>.A<H 2>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.105678 angstroms between .R<ARG 461>.A<HH12 19> and .R<GLU 357>.A<OE1 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.415456 angstroms between .R<ALA 457>.A<HB2 7> and .R<LYS 393>.A<HD2 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.396420 angstroms between .R<ILE 375>.A<HD12 16> and .R<PRO 370>.A<HB2 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 0.963141 angstroms between .R<THR 277>.A<HG1 12> and .R<HIE 257>.A<HE2 13>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.465850 angstroms between .R<PHE 273>.A<HZ 14> and .R<GLN 243>.A<HE22 15>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.461544 angstroms between .R<ALA 263>.A<HB2 7> and .R<THR 105>.A<HG1 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.437554 angstroms between .R<LEU 222>.A<HG 9> and .R<CYS 66>.A<HG 9>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.369134 angstroms between .R<ASN 210>.A<HD22 12> and .R<ASP 186>.A<HA 4>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.468089 angstroms between .R<ASN 97>.A<H 2> and .R<ASN 94>.A<HD21 11>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.472498 angstroms between .R<ASN 97>.A<H 2> and .R<ASN 94>.A<HD22 12>
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+Close contact of 1.128530 angstroms between .R<GLY 14>.A<H 2> and .R<GLU 13>.A<HB3 7>
+Checking parameters for unit 'sys'.
+Checking for bond parameters.
+Checking for angle parameters.
+check:  Warnings: 22
+Unit is OK.
+> #savepdb mol_0 1OAO_leap.pdb 
+> saveAmberParm sys system.top system.mdcrd
+Checking Unit.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Note.
+Ignoring the warning from Unit Checking.
+
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ total 2277 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CMET	1
+	NTHR	1
+  )
+ (no restraints)
+> quit
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 23; Notes = 1.
+log started: Mon Jun 28 15:44:37 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the ff14SBonlysc (ff14SB only side chain) force field
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #    Uses frcmod.ff14SB + frcmod.ff99SB14 for proteins
+>> #       = ff99SB backbone + ff14SB side chains;
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "C8"  "C" "sp3" }
+>> 	{ "2C"  "C" "sp3" }
+>> 	{ "3C"  "C" "sp3" }
+>> 	{ "CH"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "CO"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CJ"  "C" "sp2" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NP"  "N" "sp2" }
+>> 	{ "NQ"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> parm10 = loadamberparams parm10.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+(UNKNOWN ATOM TYPE: Zn)
+(UNKNOWN ATOM TYPE: EP)
+>> frcmod14SB = loadamberparams frcmod.ff14SB
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+>> frcmod99SBbb = loadamberparams frcmod.ff99SB14
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.ff99SB14
+Reading force field modification type file (frcmod)
+Reading title:
+ff99SB backbone parameters (Hornak & Simmerling) with ff14SB atom types
+>> #
+>> #	Load main chain and terminating amino acid libraries, nucleic acids
+>> #
+>> loadOff amino12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/amino12.lib
+Loading: ALA
+Loading: ARG
+Loading: ASH
+Loading: ASN
+Loading: ASP
+Loading: CYM
+Loading: CYS
+Loading: CYX
+Loading: GLH
+Loading: GLN
+Loading: GLU
+Loading: GLY
+Loading: HID
+Loading: HIE
+Loading: HIP
+Loading: HYP
+Loading: ILE
+Loading: LEU
+Loading: LYN
+Loading: LYS
+Loading: MET
+Loading: PHE
+Loading: PRO
+Loading: SER
+Loading: THR
+Loading: TRP
+Loading: TYR
+Loading: VAL
+>> loadOff aminoct12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminoct12.lib
+Loading: CALA
+Loading: CARG
+Loading: CASN
+Loading: CASP
+Loading: CCYS
+Loading: CCYX
+Loading: CGLN
+Loading: CGLU
+Loading: CGLY
+Loading: CHID
+Loading: CHIE
+Loading: CHIP
+Loading: CHYP
+Loading: CILE
+Loading: CLEU
+Loading: CLYS
+Loading: CMET
+Loading: CPHE
+Loading: CPRO
+Loading: CSER
+Loading: CTHR
+Loading: CTRP
+Loading: CTYR
+Loading: CVAL
+Loading: NHE
+Loading: NME
+>> loadOff aminont12.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/aminont12.lib
+Loading: ACE
+Loading: NALA
+Loading: NARG
+Loading: NASN
+Loading: NASP
+Loading: NCYS
+Loading: NCYX
+Loading: NGLN
+Loading: NGLU
+Loading: NGLY
+Loading: NHID
+Loading: NHIE
+Loading: NHIP
+Loading: NILE
+Loading: NLEU
+Loading: NLYS
+Loading: NMET
+Loading: NPHE
+Loading: NPRO
+Loading: NSER
+Loading: NTHR
+Loading: NTRP
+Loading: NTYR
+Loading: NVAL
+>> 
+>> #
+>> #	Define the PDB name map for the amino acids and nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "HYP" "NHYP" } { 1 "HYP" "CHYP" }
+>>   { 0 "ALA" "NALA" } { 1 "ALA" "CALA" }
+>>   { 0 "ARG" "NARG" } { 1 "ARG" "CARG" }
+>>   { 0 "ASN" "NASN" } { 1 "ASN" "CASN" }
+>>   { 0 "ASP" "NASP" } { 1 "ASP" "CASP" }
+>>   { 0 "CYS" "NCYS" } { 1 "CYS" "CCYS" }
+>>   { 0 "CYX" "NCYX" } { 1 "CYX" "CCYX" }
+>>   { 0 "GLN" "NGLN" } { 1 "GLN" "CGLN" }
+>>   { 0 "GLU" "NGLU" } { 1 "GLU" "CGLU" }
+>>   { 0 "GLY" "NGLY" } { 1 "GLY" "CGLY" }
+>>   { 0 "HID" "NHID" } { 1 "HID" "CHID" }
+>>   { 0 "HIE" "NHIE" } { 1 "HIE" "CHIE" }
+>>   { 0 "HIP" "NHIP" } { 1 "HIP" "CHIP" }
+>>   { 0 "ILE" "NILE" } { 1 "ILE" "CILE" }
+>>   { 0 "LEU" "NLEU" } { 1 "LEU" "CLEU" }
+>>   { 0 "LYS" "NLYS" } { 1 "LYS" "CLYS" }
+>>   { 0 "MET" "NMET" } { 1 "MET" "CMET" }
+>>   { 0 "PHE" "NPHE" } { 1 "PHE" "CPHE" }
+>>   { 0 "PRO" "NPRO" } { 1 "PRO" "CPRO" }
+>>   { 0 "SER" "NSER" } { 1 "SER" "CSER" }
+>>   { 0 "THR" "NTHR" } { 1 "THR" "CTHR" }
+>>   { 0 "TRP" "NTRP" } { 1 "TRP" "CTRP" }
+>>   { 0 "TYR" "NTYR" } { 1 "TYR" "CTYR" }
+>>   { 0 "VAL" "NVAL" } { 1 "VAL" "CVAL" }
+>>   { 0 "HIS" "NHIS" } { 1 "HIS" "CHIS" }
+>> }
+>> 
+>> #
+>> # assume that most often proteins use HIE
+>> #
+>> NHIS = NHIE
+>> HIS = HIE
+>> CHIS = CHIE
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #   Uses ff99bsc0+bsc1 for DNA
+>> #               (ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #               (bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #               (bsc1): Ivani et al. Nature Methods 13: 55, 2016
+>> #   load atom type hybridizations
+>> #
+>> addAtomTypes {
+>>     { "H"   "H" "sp3" }
+>>     { "HO"  "H" "sp3" }
+>>     { "HS"  "H" "sp3" }
+>>     { "H1"  "H" "sp3" }
+>>     { "H2"  "H" "sp3" }
+>>     { "H3"  "H" "sp3" }
+>>     { "H4"  "H" "sp3" }
+>>     { "H5"  "H" "sp3" }
+>>     { "HW"  "H" "sp3" }
+>>     { "HC"  "H" "sp3" }
+>>     { "HA"  "H" "sp3" }
+>>     { "HP"  "H" "sp3" }
+>>     { "HZ"  "H" "sp3" }
+>>     { "OH"  "O" "sp3" }
+>>     { "OS"  "O" "sp3" }
+>>     { "O"   "O" "sp2" }
+>>     { "O2"  "O" "sp2" }
+>>     { "OP"  "O" "sp2" }
+>>     { "OW"  "O" "sp3" }
+>>     { "CT"  "C" "sp3" }
+>>     { "CX"  "C" "sp3" }
+>>     { "C8"  "C" "sp3" }
+>>     { "2C"  "C" "sp3" }
+>>     { "3C"  "C" "sp3" }
+>>     { "CH"  "C" "sp3" }
+>>     { "CS"  "C" "sp2" }
+>>     { "C"   "C" "sp2" }
+>>     { "CO"  "C" "sp2" }
+>>     { "C*"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CB"  "C" "sp2" }
+>>     { "CC"  "C" "sp2" }
+>>     { "CN"  "C" "sp2" }
+>>     { "CM"  "C" "sp2" }
+>>     { "CK"  "C" "sp2" }
+>>     { "CQ"  "C" "sp2" }
+>>     { "CD"  "C" "sp2" }
+>>     { "C5"  "C" "sp2" }
+>>     { "C4"  "C" "sp2" }
+>>     { "CP"  "C" "sp2" }
+>>     { "CI"  "C" "sp3" }
+>>     { "CJ"  "C" "sp2" }
+>>     { "CW"  "C" "sp2" }
+>>     { "CV"  "C" "sp2" }
+>>     { "CR"  "C" "sp2" }
+>>     { "CA"  "C" "sp2" }
+>>     { "CY"  "C" "sp2" }
+>>     { "C0"  "Ca" "sp3" }
+>>     { "MG"  "Mg" "sp3" }
+>>     { "N"   "N" "sp2" }
+>>     { "NA"  "N" "sp2" }
+>>     { "N2"  "N" "sp2" }
+>>     { "N*"  "N" "sp2" }
+>>     { "NP"  "N" "sp2" }
+>>     { "NQ"  "N" "sp2" }
+>>     { "NB"  "N" "sp2" }
+>>     { "NC"  "N" "sp2" }
+>>     { "NT"  "N" "sp3" }
+>>     { "NY"  "N" "sp2" }
+>>     { "N3"  "N" "sp3" }
+>>     { "S"   "S" "sp3" }
+>>     { "SH"  "S" "sp3" }
+>>     { "P"   "P" "sp3" }
+>>     { "LP"  ""  "sp3" }
+>>     { "EP"  ""  "sp3" }
+>>     { "F"   "F" "sp3" }
+>>     { "Cl"  "Cl" "sp3" }
+>>     { "Br"  "Br" "sp3" }
+>>     { "I"   "I"  "sp3" }
+>>     { "F-"   "F" "sp3" }
+>>     { "Cl-"  "Cl" "sp3" }
+>>     { "Br-"  "Br" "sp3" }
+>>     { "I-"   "I"  "sp3" }
+>>     { "Li+"  "Li"  "sp3" }
+>>     { "Na+"  "Na"  "sp3" }
+>>     { "K+"  "K"  "sp3" }
+>>     { "Rb+"  "Rb"  "sp3" }
+>>     { "Cs+"  "Cs"  "sp3" }
+>>     { "Mg+"  "Mg"  "sp3" }
+>> }
+>> #
+>> #   Load nucleic acids
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> 
+>> addPdbResMap {
+>>   { 0 "DG" "DG5"  } { 1 "DG" "DG3"  }  
+>>   { 0 "DA" "DA5"  } { 1 "DA" "DA3"  }  
+>>   { 0 "DC" "DC5"  } { 1 "DC" "DC3"  }  
+>>   { 0 "DT" "DT5"  } { 1 "DT" "DT3"  }  
+>> #  some really old Amber residue names, assuming DNA:
+>>   { 0 "GUA" "DG5"  } { 1 "GUA" "DG3"  } { "GUA" "DG" }
+>>   { 0 "ADE" "DA5"  } { 1 "ADE" "DA3"  } { "ADE" "DA" }
+>>   { 0 "CYT" "DC5"  } { 1 "CYT" "DC3"  } { "CYT" "DC" }
+>>   { 0 "THY" "DT5"  } { 1 "THY" "DT3"  } { "THY" "DT" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "'H2'" "H2''" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "'H5'" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>> }
+>> 
+>> #
+>> # Load parameters for BSC1
+>> #
+>> addAtomTypes {
+>>   { "C1" "C" "sp2" }
+>>   { "C2" "C" "sp2" }
+>>   { "CI" "C" "sp3" }
+>>   { "CE" "C" "sp3" }
+>>  }
+>> 
+>> loadoff parmBSC1.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/parmBSC1.lib
+Loading: DA
+Loading: DA3
+Loading: DA5
+Loading: DAN
+Loading: DC
+Loading: DC3
+Loading: DC5
+Loading: DCN
+Loading: DG
+Loading: DG3
+Loading: DG5
+Loading: DGN
+Loading: DT
+Loading: DT3
+Loading: DT5
+Loading: DTN
+>> loadamberparams frcmod.parmbsc1
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/frcmod.parmbsc1
+Reading force field modification type file (frcmod)
+Reading title:
+Parmbsc1 force-field for DNA
+>> 
+>> ############
+>> # RNA ######
+>> # ##########
+>> 
+>> 
+>> # ----- NOTE: this is designed for PDB format 3!
+>> #       Uses ff99bsc0_chiOL3 for RNA
+>> #       	(ff99): Wang et al. J. Comp. Chem. 21: 1049, 2000
+>> #       	(bsc0): Perez et al. Biophys J. 92: 3817, 2007
+>> #       	(chiOL3): Zgarbova et al. JCTC 7: 2886, 2011
+>> #           (note: all of the above are in parm10.dat, loaded below)
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "H"   "H" "sp3" }
+>> 	{ "HO"  "H" "sp3" }
+>> 	{ "HS"  "H" "sp3" }
+>> 	{ "H1"  "H" "sp3" }
+>> 	{ "H2"  "H" "sp3" }
+>> 	{ "H3"  "H" "sp3" }
+>> 	{ "H4"  "H" "sp3" }
+>> 	{ "H5"  "H" "sp3" }
+>> 	{ "HW"  "H" "sp3" }
+>> 	{ "HC"  "H" "sp3" }
+>> 	{ "HA"  "H" "sp3" }
+>> 	{ "HP"  "H" "sp3" }
+>> 	{ "HZ"  "H" "sp3" }
+>> 	{ "OH"  "O" "sp3" }
+>> 	{ "OS"  "O" "sp3" }
+>> 	{ "O"   "O" "sp2" }
+>> 	{ "O2"  "O" "sp2" }
+>> 	{ "OP"  "O" "sp2" }
+>> 	{ "OW"  "O" "sp3" }
+>> 	{ "CT"  "C" "sp3" }
+>> 	{ "CX"  "C" "sp3" }
+>> 	{ "CS"  "C" "sp2" }
+>> 	{ "C"   "C" "sp2" }
+>> 	{ "C*"  "C" "sp2" }
+>> 	{ "CA"  "C" "sp2" }
+>> 	{ "CB"  "C" "sp2" }
+>> 	{ "CC"  "C" "sp2" }
+>> 	{ "CN"  "C" "sp2" }
+>> 	{ "CM"  "C" "sp2" }
+>> 	{ "CK"  "C" "sp2" }
+>> 	{ "CQ"  "C" "sp2" }
+>> 	{ "CD"  "C" "sp2" }
+>> 	{ "C5"  "C" "sp2" }
+>> 	{ "C4"  "C" "sp2" }
+>> 	{ "CP"  "C" "sp2" }
+>> 	{ "CI"  "C" "sp3" }
+>> 	{ "CW"  "C" "sp2" }
+>> 	{ "CV"  "C" "sp2" }
+>> 	{ "CR"  "C" "sp2" }
+>> 	{ "CY"  "C" "sp2" }
+>> 	{ "C0"  "Ca" "sp3" }
+>> 	{ "MG"  "Mg" "sp3" }
+>> 	{ "N"   "N" "sp2" }
+>> 	{ "NA"  "N" "sp2" }
+>> 	{ "N2"  "N" "sp2" }
+>> 	{ "N*"  "N" "sp2" }
+>> 	{ "NB"  "N" "sp2" }
+>> 	{ "NC"  "N" "sp2" }
+>> 	{ "NT"  "N" "sp3" }
+>> 	{ "NY"  "N" "sp2" }
+>> 	{ "N3"  "N" "sp3" }
+>> 	{ "S"   "S" "sp3" }
+>> 	{ "SH"  "S" "sp3" }
+>> 	{ "P"   "P" "sp3" }
+>> 	{ "LP"  ""  "sp3" }
+>> 	{ "EP"  ""  "sp3" }
+>> 	{ "F"   "F" "sp3" }
+>> 	{ "Cl"  "Cl" "sp3" }
+>> 	{ "Br"  "Br" "sp3" }
+>> 	{ "I"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the main parameter set.
+>> #
+>> #parm10 = loadamberparams parm10.dat
+>> #
+>> #	Load main chain and terminating nucleic acids
+>> #
+>> 
+>> loadOff RNA.lib
+Loading library: /home/alberto.perezant/Source/amber/dat/leap/lib/RNA.lib
+Loading: A
+Loading: A3
+Loading: A5
+Loading: AN
+Loading: C
+Loading: C3
+Loading: C5
+Loading: CN
+Loading: G
+Loading: G3
+Loading: G5
+Loading: GN
+Loading: OHE
+Loading: U
+Loading: U3
+Loading: U5
+Loading: UN
+>> 
+>> #
+>> #	Define the PDB name map for the nucleic acids
+>> #
+>> addPdbResMap {
+>>   { 0 "G" "G5"  } { 1 "G" "G3"  } 
+>>   { 0 "A" "A5"  } { 1 "A" "A3"  } 
+>>   { 0 "C" "C5"  } { 1 "C" "C3"  } 
+>>   { 0 "U" "U5"  } { 1 "U" "U3"  } 
+>> #  some old Amber residue names for RNA:
+>>   { 0  "RA5" "A5" } { 1 "RA3" "A3"} {"RA" "A" }
+>>   { 0  "RC5" "C5" } { 1 "RC3" "C3"} {"RC" "C" }
+>>   { 0  "RG5" "G5" } { 1 "RG3" "G3"} {"RG" "G" }
+>>   { 0  "RU5" "U5" } { 1 "RU3" "U3"} {"RU" "U" }
+>> #  uncomment out the following if you have this old style RNA files:
+>> # { 0 "GUA" "G5"  } { 1 "GUA" "G3"  } { "GUA" "G" }
+>> # { 0 "ADE" "A5"  } { 1 "ADE" "A3"  } { "ADE" "A" }
+>> # { 0 "CYT" "C5"  } { 1 "CYT" "C3"  } { "CYT" "C" }
+>> # { 0 "URA" "R5"  } { 1 "URA" "R3"  } { "URA" "R" }
+>> 
+>> }
+>> 
+>> #  try to be good about reading in really old atom names as well:
+>> addPdbAtomMap {
+>>   { "O5*" "O5'" }
+>>   { "C5*" "C5'" }
+>>   { "C4*" "C4'" }
+>>   { "O4*" "O4'" }
+>>   { "C3*" "C3'" }
+>>   { "O3*" "O3'" }
+>>   { "C2*" "C2'" }
+>>   { "O2*" "O2'" }
+>>   { "C1*" "C1'" }
+>>   { "C5M" "C7"  }
+>>   { "H1*" "H1'" }
+>>   { "H2*1" "H2'" }
+>>   { "H2*2" "H2''" }
+>>   { "H2'1" "H2'" }
+>>   { "H2'2" "H2''" }
+>>   { "H3*" "H3'" }
+>>   { "H4*" "H4'" }
+>>   { "H5*1" "H5'" }
+>>   { "H5*2" "H5''" }
+>>   { "H5'1" "H5'" }
+>>   { "H5'2" "H5''" }
+>>   { "HO'2" "HO2'" }
+>>   { "H5T"  "HO5'" }
+>>   { "H3T"  "HO3'" }
+>>   { "O1'" "O4'" }
+>>   { "OA"  "OP1" }
+>>   { "OB"  "OP2" }
+>>   { "O1P" "OP1" }
+>>   { "O2P" "OP2" }
+>>   { "O3P" "OP3" }
+>> }
+Substituting map O5* -> O5'  for  O5* -> O5'
+Substituting map C5* -> C5'  for  C5* -> C5'
+Substituting map C4* -> C4'  for  C4* -> C4'
+Substituting map O4* -> O4'  for  O4* -> O4'
+Substituting map C3* -> C3'  for  C3* -> C3'
+Substituting map O3* -> O3'  for  O3* -> O3'
+Substituting map C2* -> C2'  for  C2* -> C2'
+Substituting map O2* -> O2'  for  O2* -> O2'
+Substituting map C1* -> C1'  for  C1* -> C1'
+Substituting map C5M -> C7  for  C5M -> C7
+Substituting map H1* -> H1'  for  H1* -> H1'
+Substituting map H2*1 -> H2'  for  H2*1 -> H2'
+Substituting map H2*2 -> H2''  for  H2*2 -> H2''
+Substituting map H2'1 -> H2'  for  H2'1 -> H2'
+Substituting map H2'2 -> H2''  for  H2'2 -> H2''
+Substituting map H3* -> H3'  for  H3* -> H3'
+Substituting map H4* -> H4'  for  H4* -> H4'
+Substituting map H5*1 -> H5'  for  H5*1 -> H5'
+Substituting map H5*2 -> H5''  for  H5*2 -> H5''
+Substituting map H5'1 -> H5'  for  H5'1 -> H5'
+Substituting map H5'2 -> H5''  for  H5'2 -> H5''
+Substituting map HO'2 -> HO2'  for  HO'2 -> HO2'
+Substituting map H5T -> HO5'  for  H5T -> HO5'
+Substituting map H3T -> HO3'  for  H3T -> HO3'
+Substituting map O1' -> O4'  for  O1' -> O4'
+Substituting map OA -> OP1  for  OA -> OP1
+Substituting map OB -> OP2  for  OB -> OP2
+Substituting map O1P -> OP1  for  O1P -> OP1
+Substituting map O2P -> OP2  for  O2P -> OP2
+>> 
+> 
+> source leaprc.gaff
+----- Source: /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff
+----- Source of /home/alberto.perezant/Source/amber/dat/leap/cmd/leaprc.gaff done
+>> logFile leap.log
+log started: Mon Jun 28 15:44:38 2021
+
+Log file: ./leap.log
+>> #
+>> # ----- leaprc for loading the general Amber Force field.
+>> #       This file is mostly for use with Antechamber
+>> #
+>> #	load atom type hybridizations
+>> #
+>> addAtomTypes {
+>> 	{ "h1"  "H" "sp3" }
+>> 	{ "h2"  "H" "sp3" }
+>> 	{ "h3"  "H" "sp3" }
+>> 	{ "h4"  "H" "sp3" }
+>> 	{ "h5"  "H" "sp3" }
+>> 	{ "ha"  "H" "sp3" }
+>> 	{ "hc"  "H" "sp3" }
+>> 	{ "hn"  "H" "sp3" }
+>> 	{ "ho"  "H" "sp3" }
+>> 	{ "hp"  "H" "sp3" }
+>> 	{ "hs"  "H" "sp3" }
+>> 	{ "hw"  "H" "sp3" }
+>> 	{ "hx"  "H" "sp3" }
+>> 	{ "o"  "O" "sp2" }
+>> 	{ "o2"  "O" "sp2" }
+>> 	{ "oh"  "O" "sp3" }
+>> 	{ "os"  "O" "sp3" }
+>> 	{ "ow"  "O" "sp3" }
+>> 	{ "c"  "C" "sp2" }
+>> 	{ "c1"  "C" "sp2" }
+>> 	{ "c2"  "C" "sp2" }
+>> 	{ "c3"  "C" "sp3" }
+>> 	{ "ca"  "C" "sp2" }
+>> 	{ "cc"  "C" "sp2" }
+>> 	{ "cd"  "C" "sp2" }
+>> 	{ "ce"  "C" "sp2" }
+>> 	{ "cf"  "C" "sp2" }
+>> 	{ "cg"  "C" "sp2" }
+>> 	{ "ch"  "C" "sp2" }
+>> 	{ "cp"  "C" "sp2" }
+>> 	{ "cq"  "C" "sp2" }
+>> 	{ "cu"  "C" "sp2" }
+>> 	{ "cv"  "C" "sp2" }
+>> 	{ "cx"  "C" "sp2" }
+>> 	{ "cy"  "C" "sp2" }
+>> 	{ "cz"  "C" "sp2" }
+>> 	{ "n"   "N" "sp2" }
+>> 	{ "n1"  "N" "sp2" }
+>> 	{ "n2"  "N" "sp2" }
+>> 	{ "n3"  "N" "sp3" }
+>> 	{ "n4"  "N" "sp3" }
+>> 	{ "na"  "N" "sp2" }
+>> 	{ "nb"  "N" "sp2" }
+>> 	{ "nc"  "N" "sp2" }
+>> 	{ "nd"  "N" "sp2" }
+>> 	{ "ne"  "N" "sp2" }
+>> 	{ "nf"  "N" "sp2" }
+>> 	{ "nh"  "N" "sp2" }
+>> 	{ "no"  "N" "sp2" }
+>> 	{ "s"   "S" "sp2" }
+>> 	{ "s2"   "S" "sp2" }
+>> 	{ "s3"   "S" "sp3" }
+>> 	{ "s4"   "S" "sp3" }
+>> 	{ "s6"   "S" "sp3" }
+>> 	{ "sh"   "S" "sp3" }
+>> 	{ "ss"   "S" "sp3" }
+>> 	{ "sx"   "S" "sp3" }
+>> 	{ "sy"   "S" "sp3" }
+>> 	{ "p2"   "P" "sp2" }
+>> 	{ "p3"   "P" "sp3" }
+>> 	{ "p4"   "P" "sp3" }
+>> 	{ "p5"   "P" "sp3" }
+>> 	{ "pb"   "P" "sp3" }
+>> 	{ "pc"   "P" "sp3" }
+>> 	{ "pd"   "P" "sp3" }
+>> 	{ "pe"   "P" "sp3" }
+>> 	{ "pf"   "P" "sp3" }
+>> 	{ "px"   "P" "sp3" }
+>> 	{ "py"   "P" "sp3" }
+>> 	{ "f"   "F" "sp3" }
+>> 	{ "cl"  "Cl" "sp3" }
+>> 	{ "br"  "Br" "sp3" }
+>> 	{ "i"   "I"  "sp3" }
+>> }
+>> #
+>> #	Load the general force field parameter set.
+>> #
+>> gaff = loadamberparams gaff.dat
+Loading parameters: /home/alberto.perezant/Source/amber/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+(UNKNOWN ATOM TYPE: oq)
+(UNKNOWN ATOM TYPE: ni)
+(UNKNOWN ATOM TYPE: nj)
+(UNKNOWN ATOM TYPE: nk)
+(UNKNOWN ATOM TYPE: nl)
+(UNKNOWN ATOM TYPE: nm)
+(UNKNOWN ATOM TYPE: nn)
+(UNKNOWN ATOM TYPE: sp)
+(UNKNOWN ATOM TYPE: sq)
+> 
+> mol_0 = loadPdb 1OAO_s_centered.pdb
+Loading PDB file: ./1OAO_s_centered.pdb
+Matching PDB residue names to LEaP variables.
+Mapped residue MET, term: Terminal/beginning, seq. number: 0 to: NMET.
+Mapped residue MET, term: Terminal/last, seq. number: 728 to: CMET.
+  total atoms in file: 11469
+> 
+> translate mol_0 { 0.0 0.0 0.0 }
+> sys = combine { mol_0  }
+  Sequence: default_name
+> check sys
+Checking 'sys'....
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+Checking parameters for unit 'sys'.
+Checking for bond parameters.
+Checking for angle parameters.
+check:  Warnings: 1
+Unit is OK.
+> #savepdb mol_0 1OAO_leap.pdb 
+> saveAmberParm sys system.top system.mdcrd
+Checking Unit.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Warning!
+The unperturbed charge of the unit (-24.000000) is not zero.
+
+/home/alberto.perezant/Source/amber/bin/teLeap: Note.
+Ignoring the warning from Unit Checking.
+
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ ** Warning: No sp2 improper torsion term for  NA-CA-CN-CB
+        atoms are: NE1 CZ2 CE2 CD2
+ ** Warning: No sp2 improper torsion term for  C*-CN-CB-CA
+        atoms are: CG CE2 CD2 CE3
+ total 2279 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CMET	1
+	NMET	1
+  )
+ (no restraints)
+> quit
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 1.

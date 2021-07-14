@@ -1,0 +1,11 @@
+set default PBradii mbondi3
+source leaprc.protein.ff14SBonlysc
+source leaprc.gaff
+mol_0 = loadPdb 1OAO_s_centered.pdb
+
+translate mol_0 { 0.0 0.0 0.0 }
+sys = combine { mol_0  }
+check sys
+#savepdb mol_0 1OAO_leap.pdb 
+saveAmberParm sys system.top system.mdcrd
+quit
