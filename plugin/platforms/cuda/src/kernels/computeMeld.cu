@@ -678,18 +678,12 @@ extern "C" __global__ void computeEmapRest(
         float v_011 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
         float v_110 = mu[(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum ];
         float v_111 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum];
-        // printf("grid_max, %d %d %d \n", grid_xmax,grid_ymax,grid_zmax);
-        // printf("grid_num, %d %d %d \n", grid_xnum,grid_ynum,grid_znum);
-        // printf("v, %f %f %f %f %f %f %f %f \n", v_000,v_100,v_010,v_001,v_101,v_011,v_110,v_111);
         float grid_x_pos = grid_x[grid_xnum]-atom_pos.x;
         float grid_y_pos = grid_y[grid_ynum]-atom_pos.y;
         float grid_z_pos = grid_z[grid_znum]-atom_pos.z;
         float grid_xpos = atom_pos.x-grid_x[grid_xnum+1];
         float grid_ypos = atom_pos.y-grid_y[grid_ynum+1];
         float grid_zpos = atom_pos.z-grid_z[grid_znum+1];
-        // printf("grid_x_pos, %f %f %f \n", grid_x_pos,grid_y_pos,grid_z_pos);
-        // printf("grid_xpos, %f %f %f \n", grid_xpos,grid_ypos,grid_zpos);
-        // float3 diff = trimTo3(posq[atomIndex]) - make_float3(grid_x[grid_xnum],grid_y[grid_ynum],grid_z[grid_znum]);
         float energy = emap_weight * (v_000 * grid_x_pos * grid_y_pos * grid_z_pos              
                      + v_100 * grid_xpos * grid_y_pos * grid_z_pos 
                      + v_010 * grid_x_pos * grid_ypos * grid_z_pos   
@@ -728,8 +722,6 @@ extern "C" __global__ void computeEmapRest(
         
         forceBuffer[index] = make_float3(f_x,f_y,f_z);
         energies[globalIndex] += energy;
-        // printf("energy: %f \n",energy);
-        // printf("force: %f %f %f \n",f_x,f_y,f_z);
         __syncthreads();
     }
 }
