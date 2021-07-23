@@ -699,7 +699,8 @@ def emap_blur(mu,gridpos_z,gridpos_y,gridpos_x,scale,threshold=0.3):
             for i in range(cycle):
                 tmp_grid_pos=grid_pos[i*5000:(i+1)*5000]
                 tmp_pot=np.matmul(np.exp(-1*np.linalg.norm(tmp_grid_pos[:, None, :] - grid_pos[None, :, :], axis=-1)/(2*((0.4*(gridpos_z[-1]-gridpos_z[-2]))**2+(((1-scale)*(gridpos_z[-1]-gridpos_z[-2]))**2)))),mu) 
-                all_pot.append(tmp_pot)
+                all_pot.append(tmp_pot)  
+    potential=np.concatenate(all_pot)*(threshold/np.concatenate(all_pot).max())
     return potential.astype(np.float64)
 
 
