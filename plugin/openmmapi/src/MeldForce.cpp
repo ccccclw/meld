@@ -509,25 +509,25 @@ void MeldForce::modifyTorsProfileRestraint(int index, int atom1, int atom2, int 
         updateMeldParticleSet();
 }
 
-int MeldForce::addEmapRestraint(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+int MeldForce::addEmapRestraint(std::vector<int> particle, std::vector<double> mu,
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z) {
     for (int i = 0; i < particle.size();i++){
         meldParticleSet.insert(particle[i]);
     }
     // meldParticleSet.insert(particle);
     emapRestraints.push_back(
-        EmapRestraintInfo(particle, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z,n_restraints));
+        EmapRestraintInfo(particle, mu, gridpos_x, gridpos_y, gridpos_z, n_restraints));
     n_restraints++;
     return n_restraints - 1;
 }
 
-void MeldForce::modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+void MeldForce::modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu,  
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z) {
     int oldGlobal = emapRestraints[index].globalIndex; 
     bool updateParticles = false;
     if(emapRestraints[index].particle[0]!=particle[0])
         updateParticles=true;
-    emapRestraints[index] = EmapRestraintInfo(particle, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, oldGlobal);
+    emapRestraints[index] = EmapRestraintInfo(particle, mu, gridpos_x, gridpos_y, gridpos_z,oldGlobal);
     if(updateParticles)
         updateMeldParticleSet();
 }
@@ -677,8 +677,6 @@ void MeldForce::getGMMRestraintParams(int index, int& nPairs, int& nComponents, 
 
 void MeldForce::getEmapRestraintParams(int index, std::vector<int>& atom, 
                             std::vector<double>& mu, 
-                            std::vector<double>& blur,
-                            std::vector<double>& bandwidth,
                             std::vector<double>& gridpos_x,
                             std::vector<double>& gridpos_y,
                             std::vector<double>& gridpos_z,
@@ -686,8 +684,6 @@ void MeldForce::getEmapRestraintParams(int index, std::vector<int>& atom,
     const EmapRestraintInfo& rest = emapRestraints[index];
     atom = rest.particle;
     mu = rest.mu;
-    blur = rest.blur;
-    bandwidth = rest.bandwidth;
     gridpos_x = rest.gridpos_x;
     gridpos_y = rest.gridpos_y;
     gridpos_z = rest.gridpos_z;

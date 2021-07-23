@@ -86,7 +86,7 @@ CudaCalcMeldForceKernel::CudaCalcMeldForceKernel(std::string name, const Platfor
     numDistProfileRestraints = 0;
     numGMMRestraints = 0;
     numEmapRestraints = 0;
-    numEmapGrids = 0;
+    numEmapGrids = make_int3(0,0,0);
     numEmapAtoms = 0;
     numRestraints = 0;
     numGroups = 0;
@@ -133,10 +133,10 @@ CudaCalcMeldForceKernel::CudaCalcMeldForceKernel(std::string name, const Platfor
     gmmAtomIndices = nullptr;
     gmmData = nullptr;
     gmmForces = nullptr;
-    emapGridPos = nullptr;
+    emapGridPosx = nullptr;
+    emapGridPosy = nullptr;
+    emapGridPosz = nullptr;
     emapMu = nullptr;
-    emapBlur = nullptr;
-    emapBandwidth = nullptr;
     emapAtomIndices = nullptr;
     emap_weights = nullptr;
     emapGlobalIndices = nullptr;
@@ -196,10 +196,10 @@ CudaCalcMeldForceKernel::~CudaCalcMeldForceKernel() {
     delete gmmAtomIndices;
     delete gmmData;
     delete gmmForces;
-    delete emapGridPos;
+    delete emapGridPosx;
+    delete emapGridPosy;
+    delete emapGridPosz;
     delete emapMu;
-    delete emapBlur;
-    delete emapBandwidth;
     delete emapAtomIndices;
     delete emap_weights;
     delete emapGlobalIndices;
@@ -294,13 +294,13 @@ void CudaCalcMeldForceKernel::allocateMemory(const MeldForce& force) {
 
     if (numEmapRestraints > 0) {
         emapAtomIndices            = CudaArray::create<int>    (cu,  calcNumEmapAtoms(force),        "emapAtomIndices");
-        emapGridPos                = CudaArray::create<float3> (cu,  calcNumGrids(force),            "emapGridPos");
-        emapMu                     = CudaArray::create<float>  (cu,  calcNumGrids(force),            "emapMu");
-        emapBlur                   = CudaArray::create<float>  (cu,  calcNumGrids(force),            "emapBlur");
-        emapBandwidth              = CudaArray::create<float>  (cu,  calcNumGrids(force),            "emapBandwidth");
-        emap_weights               = CudaArray::create<float>  (cu,  calcNumEmapAtoms(force),            "emap_weights");
-        emapGlobalIndices          = CudaArray::create<int>    (cu,  numEmapRestraints,            "emapGlobalIndices");
-        emapRestForces             = CudaArray::create<float3> (cu,  calcNumEmapAtoms(force),            "emapRestForces");
+        emapGridPosx               = CudaArray::create<float>  (cu,  calcNumGrids(force).x,          "emapGridPos");
+        emapGridPosy               = CudaArray::create<float>  (cu,  calcNumGrids(force).y,          "emapGridPos");
+        emapGridPosz               = CudaArray::create<float>  (cu,  calcNumGrids(force).z,          "emapGridPos");
+        emapMu                     = CudaArray::create<float>  (cu,  calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z,   "emapMu");
+        emap_weights               = CudaArray::create<float>  (cu,  calcNumEmapAtoms(force),        "emap_weights");
+        emapGlobalIndices          = CudaArray::create<int>    (cu,  numEmapRestraints,              "emapGlobalIndices");
+        emapRestForces             = CudaArray::create<float3> (cu,  calcNumEmapAtoms(force),        "emapRestForces");
     }
 
     restraintEnergies              = CudaArray::create<float>  ( cu, numRestraints,                "restraintEnergies");
@@ -350,10 +350,10 @@ void CudaCalcMeldForceKernel::allocateMemory(const MeldForce& force) {
     h_gmmOffsets                          = std::vector<int2>   (numGMMRestraints, make_int2(0, 0));
     h_gmmAtomIndices                      = std::vector<int>    (calcSizeGMMAtomIndices(force), 0);
     h_gmmData                             = std::vector<float>  (calcSizeGMMData(force), 0);
-    h_emapGridPos                         = std::vector<float3> (calcNumGrids(force), make_float3(0, 0, 0));
-    h_emapMu                              = std::vector<float>  (calcNumGrids(force), 0);
-    h_emapBlur                            = std::vector<float>  (calcNumGrids(force), 0);
-    h_emapBandwidth                       = std::vector<float>  (calcNumGrids(force), 0);
+    h_emapGridPosx                        = std::vector<float>  (calcNumGrids(force).x, 0);
+    h_emapGridPosy                        = std::vector<float>  (calcNumGrids(force).y, 0);
+    h_emapGridPosz                        = std::vector<float>  (calcNumGrids(force).z, 0);
+    h_emapMu                              = std::vector<float>  (calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z, 0);
     h_emapAtomIndices                     = std::vector<int>    (calcNumEmapAtoms(force), -1);
     h_emap_weights                        = std::vector<float>  (calcNumEmapAtoms(force), 0);
     h_emapGlobalIndices                   = std::vector<int>    (numEmapRestraints, -1);
@@ -738,19 +738,28 @@ void CudaCalcMeldForceKernel::setupEmapRestraints(const MeldForce &force)
     {
         int global_index;
         std::vector<int> atom;
-        std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
-        force.getEmapRestraintParams(i, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+        std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
+        force.getEmapRestraintParams(i, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
         for (int d = 0; d < gridpos_x.size(); ++d) {
-            h_emapGridPos[d] = make_float3(gridpos_x[d], gridpos_y[d], gridpos_z[d]);
+            h_emapGridPosx[d] = gridpos_x[d];
+            // h_emapMu[d] = mu[d];
+            // h_emapBlur[d] = blur[d];
+            // h_emapBandwidth[d] = bandwidth[d];
+        }
+        for (int d = 0; d < gridpos_y.size(); ++d) {
+            h_emapGridPosy[d] = gridpos_y[d];
+        }
+        for (int d = 0; d < gridpos_z.size(); ++d) {
+            h_emapGridPosz[d] = gridpos_z[d];
+        }
+        for (int d = 0; d < gridpos_x.size()*gridpos_y.size()*gridpos_z.size(); ++d) {
             h_emapMu[d] = mu[d];
-            h_emapBlur[d] = blur[d];
-            h_emapBandwidth[d] = bandwidth[d];
         }
         for (int a = 0; a < atom.size(); ++a){
             h_emap_weights[a+atomset] = system.getParticleMass(atom[a]);
             h_emapAtomIndices[a+atomset] = atom[a];
         }
-        h_emapGlobalIndices[i] = global_index;
+        h_emapGlobalIndices[i] = global_index; 
         atomset+=atom.size();
     
     }
@@ -865,15 +874,15 @@ int CudaCalcMeldForceKernel::calcSizeGMMData(const MeldForce& force) {
     return total;
 }
 
-int CudaCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
+int3 CudaCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
 {
     int global_index;
     std::vector<int> atom;
-    std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
+    std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
     if (numEmapRestraints > 0) {
-        force.getEmapRestraintParams(0, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+        force.getEmapRestraintParams(0, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
     }
-    return gridpos_x.size();
+    return make_int3(gridpos_x.size(),gridpos_y.size(),gridpos_z.size());
 }
 
 int CudaCalcMeldForceKernel::calcNumEmapAtoms(const MeldForce &force)
@@ -881,9 +890,9 @@ int CudaCalcMeldForceKernel::calcNumEmapAtoms(const MeldForce &force)
     int total = 0;
     int global_index;
     std::vector<int> atom;
-    std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
+    std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
     for (int i=0; i<force.getNumEmapRestraints(); ++i) {
-        force.getEmapRestraintParams(i, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+        force.getEmapRestraintParams(i, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
         total += atom.size();
     }
     return total;
@@ -941,10 +950,10 @@ void CudaCalcMeldForceKernel::validateAndUpload() {
     }
 
     if (numEmapRestraints > 0) {
-        emapGridPos->upload(h_emapGridPos);
+        emapGridPosx->upload(h_emapGridPosx);
+        emapGridPosy->upload(h_emapGridPosy);
+        emapGridPosz->upload(h_emapGridPosz);
         emapMu->upload(h_emapMu);
-        emapBlur->upload(h_emapBlur);
-        emapBandwidth->upload(h_emapBandwidth);
         emapAtomIndices->upload(h_emapAtomIndices);
         emap_weights->upload(h_emap_weights);
         emapGlobalIndices->upload(h_emapGlobalIndices);
@@ -1127,10 +1136,10 @@ double CudaCalcMeldForceKernel::execute(ContextImpl& context, bool includeForces
         void* emapArgs[] = {
             &cu.getPosq().getDevicePointer(),
             &emapAtomIndices->getDevicePointer(),
-            &emapGridPos->getDevicePointer(),
+            &emapGridPosx->getDevicePointer(),
+            &emapGridPosy->getDevicePointer(),
+            &emapGridPosz->getDevicePointer(),
             &emapMu->getDevicePointer(),
-            &emapBlur->getDevicePointer(),
-            &emapBandwidth->getDevicePointer(),
             &emap_weights->getDevicePointer(),
             &emapGlobalIndices->getDevicePointer(),
             &restraintEnergies->getDevicePointer(),

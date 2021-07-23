@@ -54,7 +54,7 @@ private:
     int numTorsProfileRestParams;
     int numGMMRestraints;
     int numEmapRestraints;
-    int numEmapGrids;
+    int3 numEmapGrids;
     int numEmapAtoms;
     int numRestraints;
     int numGroups;
@@ -217,14 +217,17 @@ private:
     OpenMM::CudaArray* emapGridPos;
     std::vector<float3> h_emapGridPos;
 
+    OpenMM::CudaArray* emapGridPosx;
+    std::vector<float> h_emapGridPosx;
+
+    OpenMM::CudaArray* emapGridPosy;
+    std::vector<float> h_emapGridPosy;
+
+    OpenMM::CudaArray* emapGridPosz;
+    std::vector<float> h_emapGridPosz;
+
     OpenMM::CudaArray* emapMu;
     std::vector<float> h_emapMu;
-
-    OpenMM::CudaArray* emapBlur;
-    std::vector<float> h_emapBlur;
-
-    OpenMM::CudaArray* emapBandwidth;
-    std::vector<float> h_emapBandwidth;
 
     OpenMM::CudaArray* emapAtomIndices;
     std::vector<int> h_emapAtomIndices;
@@ -297,7 +300,7 @@ private:
     void validateAndUpload();
     int calcSizeGMMAtomIndices(const MeldForce& force);
     int calcSizeGMMData(const MeldForce& force);
-    int calcNumGrids(const MeldForce& force);
+    int3 calcNumGrids(const MeldForce& force);
     int calcNumEmapAtoms(const MeldForce &force);
 };
 } // namespace MeldPlugin

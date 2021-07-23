@@ -646,39 +646,90 @@ extern "C" __global__ void computeGMMRest(
 extern "C" __global__ void computeEmapRest(
                             const real4* __restrict__ posq, 
                             const int* __restrict__ atomIndices, 
-                            const float3* __restrict__ grids,
+                            const float* __restrict__ grid_x,
+                            const float* __restrict__ grid_y,
+                            const float* __restrict__ grid_z,
                             const float* __restrict__ mu,
-                            const float* __restrict__ blur,
-                            const float* __restrict__ bandwidth,
                             const float* __restrict__ emap_weights,
                             int* __restrict__ indexToGlobal,
                             float* __restrict__ energies, 
                             float3* __restrict__ forceBuffer,
                             const int numRestraints,
-                            const int numEmapGrids,
+                            const int3 numEmapGrids,
                             const int numEmapAtoms) {
     int globalIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    float emap_energy = 0; 
     for (int index=blockIdx.x*blockDim.x+threadIdx.x; index<numEmapAtoms; index+=blockDim.x*gridDim.x) {
         int atomIndex = atomIndices[index];
         float emap_weight = emap_weights[index];
         //compute force and energy
-        float energy = 0;        
         float3 f = make_float3(0,0,0);
-        for (int grid_index = blockIdx.y*blockDim.y+threadIdx.y; grid_index < numEmapGrids; grid_index+=blockDim.y*gridDim.y)
-        {
-            float3 diff = trimTo3(posq[atomIndex]) - grids[grid_index];
-            float diffSquared = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
-            float r = SQRT(diffSquared);
-            float blurred = bandwidth[grid_index] * bandwidth[grid_index] + (1-blur[grid_index]) * (1-blur[grid_index]);
-            energy += emap_weight * mu[grid_index] * exp(-1 * diffSquared / (2 * blurred));
-            if (r > 0) {
-                f += emap_weight * mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * diff;
-            }
-            __syncthreads();
-        }
-        forceBuffer[index] = f;
+        float3 atom_pos = trimTo3(posq[atomIndex]);
+        int grid_xmax = numEmapGrids.x;
+        int grid_ymax = numEmapGrids.y;
+        int grid_zmax = numEmapGrids.z;
+        int grid_xnum = floor((atom_pos.x-grid_x[0])/(grid_x[1]-grid_x[0])) + 1;
+        int grid_ynum = floor((atom_pos.y-grid_y[0])/(grid_y[1]-grid_y[0])) + 1;
+        int grid_znum = floor((atom_pos.z-grid_z[0])/(grid_z[1]-grid_z[0])) + 1;
+        float v_000 = mu[(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+        float v_100 = mu[(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+        float v_010 = mu[(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+        float v_001 = mu[grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+        float v_101 = mu[grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+        float v_011 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+        float v_110 = mu[(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum ];
+        float v_111 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum];
+        // printf("grid_max, %d %d %d \n", grid_xmax,grid_ymax,grid_zmax);
+        // printf("grid_num, %d %d %d \n", grid_xnum,grid_ynum,grid_znum);
+        // printf("v, %f %f %f %f %f %f %f %f \n", v_000,v_100,v_010,v_001,v_101,v_011,v_110,v_111);
+        float grid_x_pos = grid_x[grid_xnum]-atom_pos.x;
+        float grid_y_pos = grid_y[grid_ynum]-atom_pos.y;
+        float grid_z_pos = grid_z[grid_znum]-atom_pos.z;
+        float grid_xpos = atom_pos.x-grid_x[grid_xnum+1];
+        float grid_ypos = atom_pos.y-grid_y[grid_ynum+1];
+        float grid_zpos = atom_pos.z-grid_z[grid_znum+1];
+        // printf("grid_x_pos, %f %f %f \n", grid_x_pos,grid_y_pos,grid_z_pos);
+        // printf("grid_xpos, %f %f %f \n", grid_xpos,grid_ypos,grid_zpos);
+        // float3 diff = trimTo3(posq[atomIndex]) - make_float3(grid_x[grid_xnum],grid_y[grid_ynum],grid_z[grid_znum]);
+        float energy = emap_weight * (v_000 * grid_x_pos * grid_y_pos * grid_z_pos              
+                     + v_100 * grid_xpos * grid_y_pos * grid_z_pos 
+                     + v_010 * grid_x_pos * grid_ypos * grid_z_pos   
+                     + v_001 * grid_x_pos * grid_y_pos * grid_zpos
+                     + v_101 * grid_xpos * grid_y_pos * grid_zpos 
+                     + v_011 * grid_x_pos * grid_ypos * grid_zpos
+                     + v_110 * grid_xpos * grid_ypos * grid_z_pos           
+                     + v_111 * grid_xpos * grid_ypos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
+
+        float f_x = -1 * emap_weight * ((v_100 - v_000) * grid_y_pos * grid_z_pos 
+                  + (v_110 - v_010) * grid_ypos * grid_z_pos
+                  + (v_101 - v_001) * grid_y_pos * grid_zpos
+                  + (v_111 - v_011) * grid_ypos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
+                
+        float f_y = -1 * emap_weight * ((v_010 - v_000) * grid_x_pos * grid_z_pos 
+                  + (v_110 - v_100) * grid_xpos * grid_z_pos
+                  + (v_011 - v_001) * grid_x_pos * grid_zpos
+                  + (v_111 - v_101) * grid_xpos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))  ;
+
+        float f_z = -1 * emap_weight * ((v_001 - v_000) * grid_x_pos * grid_y_pos 
+                  + (v_101 - v_100) * grid_xpos * grid_y_pos
+                  + (v_011 - v_010) * grid_x_pos * grid_ypos
+                  + (v_111 - v_110) * grid_xpos * grid_ypos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
+        // for (int grid_index = blockIdx.y*blockDim.y+threadIdx.y; grid_index < numEmapGrids; grid_index+=blockDim.y*gridDim.y)
+        // {
+        //     float3 diff = trimTo3(posq[atomIndex]) - grids[grid_index];
+        //     float diffSquared = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+        //     float r = SQRT(diffSquared);
+        //     float blurred = bandwidth[grid_index] * bandwidth[grid_index] + (1-blur[grid_index]) * (1-blur[grid_index]);
+        //     energy += emap_weight * mu[grid_index] * exp(-1 * diffSquared / (2 * blurred));
+        //     if (r > 0) {
+        //         f += emap_weight * mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * diff;
+        //     }
+        //     __syncthreads();
+        // }
+        
+        forceBuffer[index] = make_float3(f_x,f_y,f_z);
         energies[globalIndex] += energy;
+        // printf("energy: %f \n",energy);
+        // printf("force: %f %f %f \n",f_x,f_y,f_z);
         __syncthreads();
     }
 }

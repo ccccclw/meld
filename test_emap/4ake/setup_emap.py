@@ -13,11 +13,17 @@ import glob as glob
 import mrcfile
 import copy
 import mdtraj as md
+from sklearn.metrics import pairwise_distances,pairwise_distances_chunked
 
 
 N_REPLICAS = 8
 N_STEPS = 2000
 BLOCK_SIZE = 20
+
+
+hydrophobes = 'AILMFPWV'
+hydrophobes_res = ['ALA','ILE','LEU','MET','PHE','PRO','TRP','VAL']
+
 
 
 def _get_secondary_sequence(filename=None, contents=None, file=None):
@@ -30,7 +36,6 @@ def _get_secondary_sequence(filename=None, contents=None, file=None):
             raise RuntimeError('Unknown secondary structure type "{}"'.format(aa))
     return sequence
 
-
 def gen_state(s, index):
     pos = s._coordinates
     pos = pos - np.mean(pos, axis=0)
@@ -39,6 +44,7 @@ def gen_state(s, index):
     s._box_vectors=np.array([0.,0.,0.])
     energy = 0
     return system.SystemState(pos, vel, alpha, energy,s._box_vectors)
+
 
 def map_potential(emap, threshold, scale_factor):
     emap_cp = copy.deepcopy(emap)
@@ -50,48 +56,30 @@ def map_potential(emap, threshold, scale_factor):
 
 def setup_system():
     # load the sequence
-#    sequence = parse.get_sequence_from_AA1(filename='sequence.dat')
-#    n_res = len(sequence.split())
     templates = glob.glob('./1ake_centered.pdb')
                                   
     # build the system
-    #p = system.ProteinMoleculeFromSequence(sequence)
     p = system.ProteinMoleculeFromPdbFile(templates[0])
     b = system.SystemBuilder(forcefield="ff14sbside")
     s = b.build_system_from_molecules([p])
     s.temperature_scaler = system.ConstantTemperatureScaler(300.)#
     n_res = s.residue_numbers[-1]
 #    s.temperature_scaler = system.GeometricTemperatureScaler(0, 0.4, 300., 450.)
-    #
-    # Secondary Structure
-    #
-#    ss_scaler = s.restraints.create_scaler('constant')
-#    dist_scaler = s.restraints.create_scaler('nonlinear', alpha_min=0.4, alpha_max=1.0, factor=4.0)
-#    ss_rests = parse.get_secondary_structure_restraints(filename='ss.dat', system=s,ramp=LinearRamp(0,100,0,1), scaler=dist_scaler,
-#            torsion_force_constant=2.5, distance_force_constant=2.5)
-#    print(ss_rests)
-#    n_ss_keep = int(len(ss_rests) * 0.8) #We enforce 100% of restrains 
-#    s.restraints.add_selectively_active_collection(ss_rests, n_ss_keep)
     
-    map_file=mrcfile.open('4ake_t_5A.mrc')
+    map_file=mrcfile.open('4ake_t_4A.mrc')
     map_pot = map_potential(map_file.data,0.25,0.3) 
     map_origin = [float(i)/10 for i in map_file.header['origin'].item()]
-    map_origin = [float(i) - np.average(md.load_pdb('1ake_leap.pdb').xyz.T,axis=1)[index] for index,i in enumerate(map_origin)]
     map_voxel = [float(i)/10 for i in map_file.voxel_size.item()]
     map_x = np.linspace(map_origin[0],map_origin[0]+(map_file.data.shape[2]-1)*map_voxel[0],int(map_file.data.shape[2]))
     map_y = np.linspace(map_origin[1],map_origin[1]+(map_file.data.shape[1]-1)*map_voxel[1],int(map_file.data.shape[1]))
     map_z = np.linspace(map_origin[2],map_origin[2]+(map_file.data.shape[0]-1)*map_voxel[2],int(map_file.data.shape[0]))
-    map_x,map_y,map_z = np.meshgrid(map_z,map_y,map_x,indexing='ij')
-    map_x = np.matrix.flatten(map_x).astype(np.float64)        
-    map_y = np.matrix.flatten(map_y).astype(np.float64)
-    map_z = np.matrix.flatten(map_z).astype(np.float64)
-
-    print('map_voxel: ',map_voxel)
-    print('map_origin: ', map_origin) 
-    map_scaler = s.restraints.create_scaler('linear', alpha_min=0.0, alpha_max=1,strength_at_alpha_max=0.93)
+    all_mu=[]
+    map_scaler = s.restraints.create_scaler('constant')#, alpha_min=0.0, alpha_max=1,strength_at_alpha_max=0.93)
     map_res = []
+#
     all_emap_atoms=['N']*n_res+['C']*n_res+['O']*n_res+['CA']*n_res
-    map_res.append(s.restraints.create_restraint('emap',map_scaler,atom_res_index=list(range(1,n_res+1))*4,atom_name=all_emap_atoms, mu=np.matrix.flatten(map_pot).astype(np.float64),bandwidth=np.matrix.flatten(np.ones((map_file.data.shape))).astype(np.float64)*map_voxel[0]*0.4,gridpos=np.array([map_z,map_y,map_x]).T))
+    map_res.append(s.restraints.create_restraint('emap',map_scaler,atom_res_index=list(range(1,n_res+1))*4,atom_name=all_emap_atoms, mu=np.matrix.flatten(map_pot).astype(np.float64),gridpos_x=map_x,gridpos_y=map_y,gridpos_z=map_z))
+    #print(map_x[:,0].T.shape)
     s.restraints.add_as_always_active_list(map_res)    
     print(map_file.data.shape)
     dssp=md.compute_dssp(md.load_pdb('1ake_leap.pdb')) 
@@ -147,9 +135,8 @@ def setup_system():
                                              atom_4_res_index=res, atom_4_name='C')
             torsion_rests.append(phi_rest)  
     print(psi,phi)
-    n_tors_keep = int(0.8 * len(torsion_rests)) 
-#    s.restraints.add_as_always_active_list(torsion_rests)   
-    s.restraints.add_selectively_active_collection(torsion_rests,n_tors_keep)
+    s.restraints.add_as_always_active_list(torsion_rests)   
+#    s.restraints.add_selectively_active_collection(torsion_rests,n_tors_keep)
     rest_group = []     
     pdbs =md.load_pdb('1ake_leap.pdb')
     cas=pdbs.top.select("name CA")
@@ -170,6 +157,19 @@ def setup_system():
         rest_group.append(rest)      
      
     s.restraints.add_as_always_active_list(rest_group)
+                    
+   #               
+    # Distance Restraints
+    #               
+                    
+    # High reliability
+    #               
+    #               
+    old_protocol = s.restraints.create_scaler('nonlinear', alpha_min=0.40, alpha_max=1.00, factor=4.0)
+    #               
+    # Heuristic Restraints
+    #               
+                    
                     
                     
     # setup mcmc at startup

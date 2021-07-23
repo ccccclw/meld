@@ -1118,15 +1118,17 @@ class EmapRestraint(SelectableRestraint):
         atom_res_index,
         atom_name,
         mu: np.ndarray,
-        bandwidth: np.ndarray,
-        gridpos: np.ndarray
+        gridpos_x: np.ndarray,
+        gridpos_y: np.ndarray,
+        gridpos_z: np.ndarray
     ):
         self.atom_index = [system.index_of_atom(atom_res_index[i], atom_name[i]) for i in range(len(atom_res_index))]
         self.scaler = ConstantScaler() if scaler is None else scaler
         self.ramp = ConstantRamp() if ramp is None else ramp
         self.mu = mu
-        self.bandwidth = bandwidth
-        self.gridpos = gridpos
+        self.gridpos_x = gridpos_x
+        self.gridpos_y = gridpos_y
+        self.gridpos_z = gridpos_z
 
 
 class AlwaysActiveCollection:

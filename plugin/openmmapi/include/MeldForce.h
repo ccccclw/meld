@@ -231,13 +231,11 @@ public:
      * 
      */
     void getEmapRestraintParams(int index, std::vector<int>& atom, 
-                            std::vector<double>& mu, 
-                            std::vector<double>& blur,
-                            std::vector<double>& bandwidth,
-                            std::vector<double>& gridpos_x,
-                            std::vector<double>& gridpos_y,
-                            std::vector<double>& gridpos_z,
-                            int& globalIndex) const;
+                                std::vector<double>& mu, 
+                                std::vector<double>& gridpos_x,
+                                std::vector<double>& gridpos_y,
+                                std::vector<double>& gridpos_z,
+                                int& globalIndex) const;
 
     /**
      * Get the parameters for a group of restraints.
@@ -554,10 +552,10 @@ public:
      * Create a new Emap restraint.
      * 
      */
-    int addEmapRestraint(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+    int addEmapRestraint(std::vector<int> particle, std::vector<double> mu,
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
 
-    void modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
+    void modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu,
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
 
     
@@ -779,8 +777,6 @@ private:
     public:
         std::vector<int> particle;
         std::vector<double> mu;
-        std::vector<double> blur;
-        std::vector<double> bandwidth;
         std::vector<double> gridpos_x;
         std::vector<double> gridpos_y; 
         std::vector<double> gridpos_z;
@@ -790,9 +786,10 @@ private:
             // particle = -1;
             globalIndex = -1;
         }
-        EmapRestraintInfo(std::vector<int> particle, std::vector<double> mu, std::vector<double> blur, std::vector<double> bandwidth, 
-        std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z, int globalIndex): particle(particle),
-        mu(mu), blur(blur), bandwidth(bandwidth), gridpos_x(gridpos_x), gridpos_y(gridpos_y), gridpos_z(gridpos_z), globalIndex(globalIndex) {}
+        EmapRestraintInfo(std::vector<int> particle, std::vector<double> mu, 
+        std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z, int globalIndex): 
+        particle(particle), mu(mu), gridpos_x(gridpos_x), gridpos_y(gridpos_y), gridpos_z(gridpos_z), 
+        globalIndex(globalIndex) {}
         
     };
 

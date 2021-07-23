@@ -683,10 +683,28 @@ class MeldRestraintTransformer(TransformerBase):
                         )
             self.force.updateParametersInContext(simulation.context)
 
+def emap_blur(mu,gridpos_z,gridpos_y,gridpos_x,scale,threshold=0.3):
+    potential=np.zeros(mu.shape[0])
+    if scale == 1:
+        potential=mu
+    else:   
+        map_x,map_y,map_z = np.meshgrid(gridpos_z,gridpos_y,gridpos_x,indexing='ij')
+        map_x = np.matrix.flatten(map_x).astype(np.float64)
+        map_y = np.matrix.flatten(map_y).astype(np.float64)
+        map_z = np.matrix.flatten(map_z).astype(np.float64)
+        grid_pos = np.array([map_z,map_y,map_x]).T
+        all_pot=[]
+        if grid_pos.shape[0] > 50000:
+            cycle=int(grid_pos.shape[0]//5000)
+            for i in range(cycle):
+                tmp_grid_pos=grid_pos[i*5000:(i+1)*5000]
+                tmp_pot=np.matmul(np.exp(-1*np.linalg.norm(tmp_grid_pos[:, None, :] - grid_pos[None, :, :], axis=-1)/(2*((0.4*(gridpos_z[-1]-gridpos_z[-2]))**2+(((1-scale)*(gridpos_z[-1]-gridpos_z[-2]))**2)))),mu) 
+                all_pot.append(tmp_pot)
+    return potential.astype(np.float64)
+
 
 def _add_meld_restraint(rest, meld_force, alpha, timestep):
     scale = rest.scaler(alpha) * rest.ramp(timestep)
-
     if isinstance(rest, restraints.DistanceRestraint):
         rest_index = meld_force.addDistanceRestraint(
             rest.atom_index_1 - 1,
@@ -778,12 +796,10 @@ def _add_meld_restraint(rest, meld_force, alpha, timestep):
     elif isinstance(rest, restraints.EmapRestraint):
         rest_index = meld_force.addEmapRestraint(
         [a-1 for a in rest.atom_index],
-        rest.mu,
-        np.ones(rest.mu.shape)*scale,
-        rest.bandwidth,
-        rest.gridpos[:,0],
-        rest.gridpos[:,1],
-        rest.gridpos[:,2]
+        emap_blur(rest.mu,rest.gridpos_z,rest.gridpos_y,rest.gridpos_x,scale),
+        rest.gridpos_x,
+        rest.gridpos_y,
+        rest.gridpos_z
         )
     
 
@@ -912,12 +928,10 @@ def _update_meld_restraint(
         meld_force.modifyEmapRestraint(
         emap_index,
         [a-1 for a in rest.atom_index],
-        rest.mu,
-        np.ones(rest.mu.shape)*scale,
-        rest.bandwidth,
-        rest.gridpos[:,0],
-        rest.gridpos[:,1],
-        rest.gridpos[:,2]
+        emap_blur(rest.mu,rest.gridpos_z,rest.gridpos_y,rest.gridpos_x,scale),
+        rest.gridpos_x,
+        rest.gridpos_y,
+        rest.gridpos_z
         )
         emap_index += 1
 
