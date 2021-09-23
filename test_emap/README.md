@@ -31,6 +31,13 @@ Currently, the potential values for all replicas are created during setup, e.g.,
 
 when ```cubic=0```, ```mu``` should be provided with map potential; when ```cubic=1```, ```cubic_mu``` should be provided with calculated coefficients for cubic interpolation based on map potential.
 
+the blurring can be done with
+
+```python
+tmp_pot =  np.matrix.flatten(scipy.ndimage.gaussian_filter(map_pot,1))
+tmp_pot = (tmp_pot-tmp_pot.min())*0.3/(tmp_pot.max()-tmp_pot.min())
+```
+
  - [x] multiple map restraints can be used selectively in linear interpolation.
  - [x] linear interpolation (reference/cuda)
  - [x] tricubic interpolation (cuda)

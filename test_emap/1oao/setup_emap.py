@@ -11,24 +11,15 @@ from meld.system.restraints import LinearRamp,ConstantRamp
 from collections import namedtuple
 import glob as glob 
 import mrcfile
+import scipy.ndimage
 import copy
 import mdtraj as md
 
 
-N_REPLICAS = 8
+N_REPLICAS = 12
 N_STEPS = 2000
-BLOCK_SIZE = 20
+BLOCK_SIZE = 10
 
-
-def _get_secondary_sequence(filename=None, contents=None, file=None):
-    contents = parse._handle_arguments(filename, contents, file)
-    lines = contents.splitlines()
-    lines = [line.strip() for line in lines if not line.startswith('#')]
-    sequence = ''.join(lines)
-    for ss in sequence:
-        if not ss in 'HE.':
-            raise RuntimeError('Unknown secondary structure type "{}"'.format(aa))
-    return sequence
 
 
 def gen_state(s, index):
@@ -62,27 +53,21 @@ def setup_system():
     s.temperature_scaler = system.ConstantTemperatureScaler(300.)#
     n_res = s.residue_numbers[-1]
 #    s.temperature_scaler = system.GeometricTemperatureScaler(0, 0.4, 300., 450.)
-    #
-    
+#    
     map_file=mrcfile.open('1OAO_t.mrc')
-    map_pot = map_potential(map_file.data,0.01,0.3) 
+    map_pot_0 = map_potential(map_file.data,0.,0.3)
+    map_pot =  np.matrix.flatten(map_potential(map_file.data,0.,0.3)) 
+    for i in np.linspace(0.3,3,11):
+        tmp_pot =  np.matrix.flatten(scipy.ndimage.gaussian_filter(map_pot_0,i))
+        tmp_pot = (tmp_pot-tmp_pot.min())*0.3/(tmp_pot.max()-tmp_pot.min())
+        map_pot = np.vstack((map_pot,tmp_pot))
     map_origin = [float(i)/10 for i in map_file.header['origin'].item()]
-   # map_origin = [float(i) - np.average(md.load_pdb('1OAO_s_centered.pdb').xyz.T,axis=1)[index] for index,i in enumerate(map_origin)]
     map_voxel = [float(i)/10 for i in map_file.voxel_size.item()]
-    map_x = np.linspace(map_origin[0],map_origin[0]+(map_file.data.shape[2]-1)*map_voxel[0],int(map_file.data.shape[2]))
-    map_y = np.linspace(map_origin[1],map_origin[1]+(map_file.data.shape[1]-1)*map_voxel[1],int(map_file.data.shape[1]))
-    map_z = np.linspace(map_origin[2],map_origin[2]+(map_file.data.shape[0]-1)*map_voxel[2],int(map_file.data.shape[0]))
-    map_x,map_y,map_z = np.meshgrid(map_z,map_y,map_x,indexing='ij')
-    map_x = np.matrix.flatten(map_x).astype(np.float64)        
-    map_y = np.matrix.flatten(map_y).astype(np.float64)
-    map_z = np.matrix.flatten(map_z).astype(np.float64)
-
-    print('map_voxel: ',map_voxel)
-    print('map_origin: ', map_origin) 
-    map_scaler = s.restraints.create_scaler('linear', alpha_min=0.2, alpha_max=1,strength_at_alpha_max=0.9)
+    map_scaler = s.restraints.create_scaler('constant') #, alpha_min=0.2, alpha_max=1,strength_at_alpha_max=0.9)
     map_res = []
-    for i in ['CA','N','C','O']:
-        map_res.append(s.restraints.create_restraint('emap',map_scaler,atom_res_index=list(range(1,n_res+1)),atom_name=[i]*n_res, mu=np.matrix.flatten(map_pot).astype(np.float64),bandwidth=np.matrix.flatten(np.ones((map_file.data.shape))).astype(np.float64)*map_voxel[0]*0.5,gridpos=np.array([map_z,map_y,map_x]).T))
+    all_emap_atoms=['N']*n_res+['C']*n_res+['O']*n_res+['CA']*n_res
+    map_res.append(s.restraints.create_restraint('emap',map_scaler,atom_res_index=list(range(1,n_res+1))*4,atom_name=all_emap_atoms, cubic=0,mu=map_pot,map_origin=map_origin,map_dimension=[map_file.data.shape[2],map_file.data.shape[1],map_file.data.shape[0]],map_gridLength=map_voxel))
+
     s.restraints.add_as_always_active_list(map_res)                                                                                                                      
     dssp=md.compute_dssp(md.load_pdb('1OAO_s_centered.pdb')) 
     E=np.where(dssp=='E')
@@ -134,14 +119,12 @@ def setup_system():
                                              atom_3_res_index=res, atom_3_name='CA',                    
                                              atom_4_res_index=res, atom_4_name='C')
             torsion_rests.append(phi_rest)  
-    print(psi,phi)
     n_tors_keep = int(1 * len(torsion_rests)) 
     s.restraints.add_as_always_active_list(torsion_rests)   
     rest_group = []     
     pdbs =md.load_pdb('1OAO_s_centered.pdb')
     cas=pdbs.top.select("name CA")
     for i in range(n_res-3):
-#      if i in HB and i+1 in HB and i+2 in HB:#  and i+3 in HB: 
         ca_0=pdbs.top.select(f"resid {i} and name CA")
         ca_1=pdbs.top.select(f"resid {i+2} and name CA")
         dist=float(md.compute_distances(pdbs,np.array([ca_0,ca_1]).T)[0][0])
@@ -149,16 +132,13 @@ def setup_system():
         r1 = dist -0.1
         if r1 < 0:     
             r1 = 0.0   
-#        print(r1)
         rest = s.restraints.create_restraint('distance', dist_scaler,LinearRamp(0,100,0,1),
                                               r1=r1, r2=dist, r3=dist+0.001, r4=dist+0.1, k=10000,
                                               atom_1_res_index=i+1, atom_2_res_index=i+3,          
                                               atom_1_name='CA', atom_2_name='CA')
         rest_group.append(rest)      
      
-#    s.restraints.add_as_always_active_list(rest_group)
     for i in range(n_res-5):                                                         
-#      if i in HB and i+1 in HB and i+2 in HB:#  and i+3 in HB:                       
         ca_0=pdbs.top.select(f"resid {i} and name CA")                               
         ca_1=pdbs.top.select(f"resid {i+4} and name CA")                             
         dist=float(md.compute_distances(pdbs,np.array([ca_0,ca_1]).T)[0][0])         
@@ -166,7 +146,6 @@ def setup_system():
         r1 = dist -0.1                                                               
         if r1 < 0:                                                                   
             r1 = 0.0                                                                 
-        print(r1)                                                                   
         rest = s.restraints.create_restraint('distance', dist_scaler,LinearRamp(0,100,0,1),
                                               r1=r1, r2=dist, r3=dist+0.001, r4=dist+0.1, k=10000,
                                               atom_1_res_index=i+1, atom_2_res_index=i+5,          
@@ -187,7 +166,7 @@ def setup_system():
     options.use_amap = False
     options.amap_alpha_bias = 1.0
     options.amap_beta_bias = 1.0
-    options.timesteps = 222
+    options.timesteps = 500
 #    options.min_mc=1
     options.minimize_steps = 100
    # for i in range(30):
