@@ -65,6 +65,8 @@ Without density restraint
 14:07:20 INFO meld.remd.leader: Running replica exchange step 9 of 2000.
 14:07:23 INFO meld.remd.leader: Running replica exchange step 10 of 2000.
 ```
+
+Currently, we support
  - [x] multiple map restraints can be used selectively in linear interpolation.
  - [x] linear interpolation (reference/cuda)
  - [x] tricubic interpolation (cuda)
