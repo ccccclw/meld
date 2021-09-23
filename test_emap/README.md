@@ -69,7 +69,7 @@ Without density restraint
 Currently, we have
  - [x] multiple map restraints can be used selectively in linear interpolation.
  - [x] linear interpolation (reference/cuda)
- - [x] tricubic interpolation for one map restraint(cuda)
+ - [x] tricubic interpolation for one map restraint (cuda)
  - [x] grid force reference test
 
 
