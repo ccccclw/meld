@@ -1,7 +1,6 @@
 ## Grid force feature 
----
-<!-- - [x] linear interpolation (reference)
-- [x] linear interpolation test(reference) -->
+
+
 
 #### Description
 The map should contain the following information:
