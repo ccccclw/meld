@@ -38,6 +38,33 @@ tmp_pot =  np.matrix.flatten(scipy.ndimage.gaussian_filter(map_pot,1))
 tmp_pot = (tmp_pot-tmp_pot.min())*0.3/(tmp_pot.max()-tmp_pot.min())
 ```
 
+#### Speed
+The speed is tested with and without density restraint, which shows it has little computation cost.
+
+With density restraint
+```
+14:10:35 INFO meld.remd.leader: Running replica exchange step 2 of 2000.
+14:10:38 INFO meld.remd.leader: Running replica exchange step 3 of 2000.
+14:10:41 INFO meld.remd.leader: Running replica exchange step 4 of 2000.
+14:10:45 INFO meld.remd.leader: Running replica exchange step 5 of 2000.
+14:10:48 INFO meld.remd.leader: Running replica exchange step 6 of 2000.
+14:10:51 INFO meld.remd.leader: Running replica exchange step 7 of 2000.
+14:10:54 INFO meld.remd.leader: Running replica exchange step 8 of 2000.
+14:10:57 INFO meld.remd.leader: Running replica exchange step 9 of 2000.
+14:11:00 INFO meld.remd.leader: Running replica exchange step 10 of 2000.
+```
+Without density restraint
+```
+14:07:00 INFO meld.remd.leader: Running replica exchange step 2 of 2000.
+14:07:03 INFO meld.remd.leader: Running replica exchange step 3 of 2000.
+14:07:06 INFO meld.remd.leader: Running replica exchange step 4 of 2000.
+14:07:09 INFO meld.remd.leader: Running replica exchange step 5 of 2000.
+14:07:12 INFO meld.remd.leader: Running replica exchange step 6 of 2000.
+14:07:15 INFO meld.remd.leader: Running replica exchange step 7 of 2000.
+14:07:18 INFO meld.remd.leader: Running replica exchange step 8 of 2000.
+14:07:20 INFO meld.remd.leader: Running replica exchange step 9 of 2000.
+14:07:23 INFO meld.remd.leader: Running replica exchange step 10 of 2000.
+```
  - [x] multiple map restraints can be used selectively in linear interpolation.
  - [x] linear interpolation (reference/cuda)
  - [x] tricubic interpolation (cuda)
