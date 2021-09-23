@@ -1117,18 +1117,23 @@ class EmapRestraint(SelectableRestraint):
         ramp,
         atom_res_index,
         atom_name,
-        mu: np.ndarray,
-        gridpos_x: np.ndarray,
-        gridpos_y: np.ndarray,
-        gridpos_z: np.ndarray
+        cubic,
+        map_origin: list,
+        map_dimension: list,
+        map_gridLength: list,
+        mu = None,
+        cubic_mu = None
     ):
         self.atom_index = [system.index_of_atom(atom_res_index[i], atom_name[i]) for i in range(len(atom_res_index))]
         self.scaler = ConstantScaler() if scaler is None else scaler
         self.ramp = ConstantRamp() if ramp is None else ramp
+        self.cubic = cubic
         self.mu = mu
-        self.gridpos_x = gridpos_x
-        self.gridpos_y = gridpos_y
-        self.gridpos_z = gridpos_z
+        self.cubic_mu = cubic_mu
+        self.map_origin = map_origin
+        self.map_dimension = map_dimension
+        self.map_gridLength = map_gridLength
+
 
 
 class AlwaysActiveCollection:

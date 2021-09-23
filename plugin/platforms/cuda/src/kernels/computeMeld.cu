@@ -649,82 +649,160 @@ extern "C" __global__ void computeEmapRest(
                             const float* __restrict__ grid_x,
                             const float* __restrict__ grid_y,
                             const float* __restrict__ grid_z,
+                            const int* __restrict__ cubic,
                             const float* __restrict__ mu,
+                            const float* __restrict__ cubic_mu,
                             const float* __restrict__ emap_weights,
+                            const int* __restrict__ emapAtomList, 
                             int* __restrict__ indexToGlobal,
                             float* __restrict__ energies, 
                             float3* __restrict__ forceBuffer,
                             const int numRestraints,
                             const int3 numEmapGrids,
                             const int numEmapAtoms) {
-    int globalIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int index=blockIdx.x*blockDim.x+threadIdx.x; index<numEmapAtoms; index+=blockDim.x*gridDim.x) {
-        int atomIndex = atomIndices[index];
-        float emap_weight = emap_weights[index];
-        //compute force and energy
-        float3 f = make_float3(0,0,0);
-        float3 atom_pos = trimTo3(posq[atomIndex]);
-        int grid_xmax = numEmapGrids.x;
-        int grid_ymax = numEmapGrids.y;
-        int grid_zmax = numEmapGrids.z;
-        int grid_xnum = floor((atom_pos.x-grid_x[0])/(grid_x[1]-grid_x[0])) + 1;
-        int grid_ynum = floor((atom_pos.y-grid_y[0])/(grid_y[1]-grid_y[0])) + 1;
-        int grid_znum = floor((atom_pos.z-grid_z[0])/(grid_z[1]-grid_z[0])) + 1;
-        float v_000 = mu[(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
-        float v_100 = mu[(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
-        float v_010 = mu[(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
-        float v_001 = mu[grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
-        float v_101 = mu[grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
-        float v_011 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
-        float v_110 = mu[(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum ];
-        float v_111 = mu[grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum];
-        float grid_x_pos = grid_x[grid_xnum]-atom_pos.x;
-        float grid_y_pos = grid_y[grid_ynum]-atom_pos.y;
-        float grid_z_pos = grid_z[grid_znum]-atom_pos.z;
-        float grid_xpos = atom_pos.x-grid_x[grid_xnum+1];
-        float grid_ypos = atom_pos.y-grid_y[grid_ynum+1];
-        float grid_zpos = atom_pos.z-grid_z[grid_znum+1];
-        float energy = emap_weight * (v_000 * grid_x_pos * grid_y_pos * grid_z_pos              
-                     + v_100 * grid_xpos * grid_y_pos * grid_z_pos 
-                     + v_010 * grid_x_pos * grid_ypos * grid_z_pos   
-                     + v_001 * grid_x_pos * grid_y_pos * grid_zpos
-                     + v_101 * grid_xpos * grid_y_pos * grid_zpos 
-                     + v_011 * grid_x_pos * grid_ypos * grid_zpos
-                     + v_110 * grid_xpos * grid_ypos * grid_z_pos           
-                     + v_111 * grid_xpos * grid_ypos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
+        // set all emap restraints to 0 in the beginning
+        for (int res=blockIdx.y*blockDim.y+threadIdx.y; res < numRestraints; res+=blockDim.y*gridDim.y) {
+            int globalIndex = indexToGlobal[res];
+            energies[globalIndex] = 0;
+            __syncthreads();
+        }
+        // calculate force for each atom in all atom sets
+        for (int index=blockIdx.x*blockDim.x+threadIdx.x; index<numEmapAtoms; index+=blockDim.x*gridDim.x) {
+            int index_global;
+            int mu_index;
+            // determine atom is in which atom sets, then get globalIndex for store energy later
+            for (int atom_list=blockIdx.y*blockDim.y+threadIdx.y; atom_list < numRestraints; atom_list+=blockDim.y*gridDim.y) {
+                const int globalIndex = indexToGlobal[atom_list];
+                if ((index - emapAtomList[atom_list] >= 0) && (index - emapAtomList[atom_list+1] < 0)) {
+                    index_global = globalIndex;
+                    mu_index = atom_list;
+                }
+                __syncthreads();
+            }
+            int atomIndex = atomIndices[index];
+            float emap_weight = emap_weights[index]; // mass of the atom
+            float3 f = make_float3(0,0,0);
+            float3 atom_pos = trimTo3(posq[atomIndex]);
+            int grid_xmax = numEmapGrids.x;
+            int grid_ymax = numEmapGrids.y;
+            int grid_zmax = numEmapGrids.z;
+            int mu_num = grid_xmax*grid_ymax*grid_zmax; // size of map dimension to determine the atom corresponds to which grid potential set (mu) 
+                                                        // if the input has multiple maps assuming all maps have the 
+                                                        // same dimension but the potential on each grid could be different.
+                                                        // mu shape (1,num_maps*numEmapGrids.x*numEmapGrids.y*numEmapGrids.z)
+            // check the atom is in which grid
+            int grid_xnum = floor((atom_pos.x-grid_x[0])/(grid_x[1]-grid_x[0])) + 1; 
+            int grid_ynum = floor((atom_pos.y-grid_y[0])/(grid_y[1]-grid_y[0])) + 1;
+            int grid_znum = floor((atom_pos.z-grid_z[0])/(grid_z[1]-grid_z[0])) + 1;
+            // scale atom position with grid length
+            float grid_x_pos = (grid_x[grid_xnum]-atom_pos.x)/(grid_x[1]-grid_x[0]); 
+            float grid_y_pos = (grid_y[grid_ynum]-atom_pos.y)/(grid_y[1]-grid_y[0]);
+            float grid_z_pos = (grid_z[grid_znum]-atom_pos.z)/(grid_z[1]-grid_z[0]);
+            float grid_xpos = (atom_pos.x-grid_x[grid_xnum-1])/(grid_x[1]-grid_x[0]);
+            float grid_ypos = (atom_pos.y-grid_y[grid_ynum-1])/(grid_y[1]-grid_y[0]);
+            float grid_zpos = (atom_pos.z-grid_z[grid_znum-1])/(grid_z[1]-grid_z[0]);
+            float energy = 0;
+            float f_x = 0;
+            float f_y = 0;
+            float f_z = 0;
+            if (!cubic[0]) {
+            // linear interpolation
+                // get potential at 8 grids around the atom
+                float v_000 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+                float v_100 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+                float v_010 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+                float v_001 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+                float v_101 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+                float v_011 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+                float v_110 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum ];
+                float v_111 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum];
+                energy += emap_weight * (v_000 * grid_x_pos * grid_y_pos * grid_z_pos              
+                        + v_100 * grid_xpos * grid_y_pos * grid_z_pos 
+                        + v_010 * grid_x_pos * grid_ypos * grid_z_pos   
+                        + v_001 * grid_x_pos * grid_y_pos * grid_zpos
+                        + v_101 * grid_xpos * grid_y_pos * grid_zpos 
+                        + v_011 * grid_x_pos * grid_ypos * grid_zpos
+                        + v_110 * grid_xpos * grid_ypos * grid_z_pos           
+                        + v_111 * grid_xpos * grid_ypos * grid_zpos)  ;
 
-        float f_x = -1 * emap_weight * ((v_100 - v_000) * grid_y_pos * grid_z_pos 
-                  + (v_110 - v_010) * grid_ypos * grid_z_pos
-                  + (v_101 - v_001) * grid_y_pos * grid_zpos
-                  + (v_111 - v_011) * grid_ypos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
+                f_x += -1 * emap_weight * ((v_100 - v_000) * grid_y_pos * grid_z_pos 
+                        + (v_110 - v_010) * grid_ypos * grid_z_pos
+                        + (v_101 - v_001) * grid_y_pos * grid_zpos
+                        + (v_111 - v_011) * grid_ypos * grid_zpos)/(grid_x[1]-grid_x[0])   ;
+                        
+                f_y += -1 * emap_weight * ((v_010 - v_000) * grid_x_pos * grid_z_pos 
+                        + (v_110 - v_100) * grid_xpos * grid_z_pos
+                        + (v_011 - v_001) * grid_x_pos * grid_zpos
+                        + (v_111 - v_101) * grid_xpos * grid_zpos)/(grid_x[1]-grid_x[0])  ;
+
+                f_z += -1 * emap_weight * ((v_001 - v_000) * grid_x_pos * grid_y_pos 
+                        + (v_101 - v_100) * grid_xpos * grid_y_pos
+                        + (v_011 - v_010) * grid_x_pos * grid_ypos
+                        + (v_111 - v_110) * grid_xpos * grid_ypos)/(grid_x[1]-grid_x[0])   ;
+            } else {
+            //tri-cubic interpolation 
+                int coef_grid = ((grid_xnum-1) * (grid_ymax-1) * (grid_zmax-1) + (grid_ynum-1) * (grid_zmax-1) + grid_znum -1)*64;
+            
+                float zpow = 1;
+                float energy_0 = cubic_mu[coef_grid] + grid_xpos * (cubic_mu[coef_grid+1] + grid_xpos * (cubic_mu[coef_grid+2] + grid_xpos * cubic_mu[coef_grid+3])) 
+                        + grid_ypos*(cubic_mu[coef_grid+4] + grid_xpos * (cubic_mu[coef_grid+5] + grid_xpos * (cubic_mu[coef_grid+6] + grid_xpos * cubic_mu[coef_grid+7])))
+                        + grid_ypos*grid_ypos*(cubic_mu[coef_grid+8] + grid_xpos * (cubic_mu[coef_grid+9] + grid_xpos * (cubic_mu[coef_grid+10] + grid_xpos * cubic_mu[coef_grid+11])))
+                        + grid_ypos*grid_ypos*grid_ypos*(cubic_mu[coef_grid+12] + grid_xpos * (cubic_mu[coef_grid+13] + grid_xpos * (cubic_mu[coef_grid+14] + grid_xpos * cubic_mu[coef_grid+15])));
+                float energy_1 = cubic_mu[coef_grid+16] + grid_xpos * (cubic_mu[coef_grid+17] + grid_xpos * (cubic_mu[coef_grid+18] + grid_xpos * cubic_mu[coef_grid+19]))+
+                        grid_ypos*(cubic_mu[coef_grid+20] + grid_xpos * (cubic_mu[coef_grid+21] + grid_xpos * (cubic_mu[coef_grid+22] + grid_xpos * cubic_mu[coef_grid+23])))+
+                        grid_ypos*grid_ypos*(cubic_mu[coef_grid+24] + grid_xpos * (cubic_mu[coef_grid+25] + grid_xpos * (cubic_mu[coef_grid+26] + grid_xpos * cubic_mu[coef_grid+27])))+
+                        grid_ypos*grid_ypos*grid_ypos*(cubic_mu[coef_grid+28] + grid_xpos * (cubic_mu[coef_grid+29] + grid_xpos * (cubic_mu[coef_grid+30] + grid_xpos * cubic_mu[coef_grid+31])));
+                float energy_2 = cubic_mu[coef_grid+32] + grid_xpos * (cubic_mu[coef_grid+33] + grid_xpos * (cubic_mu[coef_grid+34] + grid_xpos * cubic_mu[coef_grid+35]))+
+                        grid_ypos*(cubic_mu[coef_grid+36] + grid_xpos * (cubic_mu[coef_grid+37] + grid_xpos * (cubic_mu[coef_grid+38] + grid_xpos * cubic_mu[coef_grid+39])))+
+                        grid_ypos*grid_ypos*(cubic_mu[coef_grid+40] + grid_xpos * (cubic_mu[coef_grid+41] + grid_xpos * (cubic_mu[coef_grid+42] + grid_xpos * cubic_mu[coef_grid+43])))+
+                        grid_ypos*grid_ypos*grid_ypos*(cubic_mu[coef_grid+44] + grid_xpos * (cubic_mu[coef_grid+45] + grid_xpos * (cubic_mu[coef_grid+46] + grid_xpos * cubic_mu[coef_grid+47])));
+                float energy_3 = cubic_mu[coef_grid+48] + grid_xpos * (cubic_mu[coef_grid+49] + grid_xpos * (cubic_mu[coef_grid+50] + grid_xpos * cubic_mu[coef_grid+51]))+
+                        grid_ypos*(cubic_mu[coef_grid+52] + grid_xpos * (cubic_mu[coef_grid+53] + grid_xpos * (cubic_mu[coef_grid+54] + grid_xpos * cubic_mu[coef_grid+55])))+
+                        grid_ypos*grid_ypos*(cubic_mu[coef_grid+56] + grid_xpos * (cubic_mu[coef_grid+57] + grid_xpos * (cubic_mu[coef_grid+58] + grid_xpos * cubic_mu[coef_grid+59])))+
+                        grid_ypos*grid_ypos*grid_ypos*(cubic_mu[coef_grid+60] + grid_xpos * (cubic_mu[coef_grid+61] + grid_xpos * (cubic_mu[coef_grid+62] + grid_xpos * cubic_mu[coef_grid+63])));
+                energy += emap_weight * (energy_0 + grid_zpos * energy_1 + grid_zpos * grid_zpos * energy_2 + grid_zpos * grid_zpos *  grid_zpos * energy_3);
+                f_z += -1 * emap_weight * (energy_1 + 2*grid_zpos*energy_2 + 3*grid_zpos*grid_zpos*energy_3)/(grid_x[1]-grid_x[0]) ;
+           
+                float dx_1 = cubic_mu[coef_grid+1] + cubic_mu[coef_grid+5] * grid_ypos + cubic_mu[coef_grid+9] * grid_ypos * grid_ypos + cubic_mu[coef_grid+13] * grid_ypos * grid_ypos * grid_ypos 
+                    + grid_zpos*(cubic_mu[coef_grid+17] + cubic_mu[coef_grid+21] * grid_ypos + cubic_mu[coef_grid+25] * grid_ypos * grid_ypos + cubic_mu[coef_grid+29] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+33] + cubic_mu[coef_grid+37] * grid_ypos + cubic_mu[coef_grid+41] * grid_ypos * grid_ypos + cubic_mu[coef_grid+45] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+49] + cubic_mu[coef_grid+53] * grid_ypos + cubic_mu[coef_grid+57] * grid_ypos * grid_ypos + cubic_mu[coef_grid+61] * grid_ypos * grid_ypos * grid_ypos);
+
+                float dx_2 = 2 * grid_xpos * (cubic_mu[coef_grid+2] + cubic_mu[coef_grid+6] * grid_ypos + cubic_mu[coef_grid+10] * grid_ypos * grid_ypos + cubic_mu[coef_grid+14] * grid_ypos * grid_ypos * grid_ypos
+                    + grid_zpos*(cubic_mu[coef_grid+18] + cubic_mu[coef_grid+22] * grid_ypos + cubic_mu[coef_grid+26] * grid_ypos * grid_ypos + cubic_mu[coef_grid+30] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+34] + cubic_mu[coef_grid+38] * grid_ypos + cubic_mu[coef_grid+42] * grid_ypos * grid_ypos + cubic_mu[coef_grid+46] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+50] + cubic_mu[coef_grid+54] * grid_ypos + cubic_mu[coef_grid+58] * grid_ypos * grid_ypos + cubic_mu[coef_grid+62] * grid_ypos * grid_ypos * grid_ypos));
+                    
+                float dx_3 = 3 * grid_xpos * grid_xpos * (cubic_mu[coef_grid+3] + cubic_mu[coef_grid+7] * grid_ypos + cubic_mu[coef_grid+11] * grid_ypos * grid_ypos + cubic_mu[coef_grid+15] * grid_ypos * grid_ypos * grid_ypos
+                    + grid_zpos*(cubic_mu[coef_grid+19] + cubic_mu[coef_grid+23] * grid_ypos + cubic_mu[coef_grid+27] * grid_ypos * grid_ypos + cubic_mu[coef_grid+31] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+35] + cubic_mu[coef_grid+39] * grid_ypos + cubic_mu[coef_grid+43] * grid_ypos * grid_ypos + cubic_mu[coef_grid+47] * grid_ypos * grid_ypos * grid_ypos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+51] + cubic_mu[coef_grid+55] * grid_ypos + cubic_mu[coef_grid+59] * grid_ypos * grid_ypos + cubic_mu[coef_grid+63] * grid_ypos * grid_ypos * grid_ypos));
+                f_x += -1 * emap_weight * (dx_1 + dx_2 + dx_3)/(grid_x[1]-grid_x[0]) ;
+
+                float dy_1 = cubic_mu[coef_grid+4] + cubic_mu[coef_grid+5] * grid_xpos + cubic_mu[coef_grid+6] * grid_xpos * grid_xpos + cubic_mu[coef_grid+7] * grid_xpos * grid_xpos * grid_xpos 
+                    + grid_zpos*(cubic_mu[coef_grid+20] + cubic_mu[coef_grid+21] * grid_xpos + cubic_mu[coef_grid+22] * grid_xpos * grid_xpos + cubic_mu[coef_grid+23] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+36] + cubic_mu[coef_grid+37] * grid_xpos + cubic_mu[coef_grid+38] * grid_xpos * grid_xpos + cubic_mu[coef_grid+39] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+52] + cubic_mu[coef_grid+53] * grid_xpos + cubic_mu[coef_grid+54] * grid_xpos * grid_xpos + cubic_mu[coef_grid+55] * grid_xpos * grid_xpos * grid_xpos);
                 
-        float f_y = -1 * emap_weight * ((v_010 - v_000) * grid_x_pos * grid_z_pos 
-                  + (v_110 - v_100) * grid_xpos * grid_z_pos
-                  + (v_011 - v_001) * grid_x_pos * grid_zpos
-                  + (v_111 - v_101) * grid_xpos * grid_zpos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))  ;
+                float dy_2 = 2 * grid_ypos * (cubic_mu[coef_grid+8] + cubic_mu[coef_grid+9] * grid_xpos + cubic_mu[coef_grid+10] * grid_xpos * grid_xpos + cubic_mu[coef_grid+11] * grid_xpos * grid_xpos * grid_xpos
+                    + grid_zpos*(cubic_mu[coef_grid+24] + cubic_mu[coef_grid+25] * grid_xpos + cubic_mu[coef_grid+26] * grid_xpos * grid_xpos + cubic_mu[coef_grid+27] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+40] + cubic_mu[coef_grid+41] * grid_xpos + cubic_mu[coef_grid+42] * grid_xpos * grid_xpos + cubic_mu[coef_grid+43] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+56] + cubic_mu[coef_grid+57] * grid_xpos + cubic_mu[coef_grid+58] * grid_xpos * grid_xpos + cubic_mu[coef_grid+59] * grid_xpos * grid_xpos * grid_xpos)); 
+                
+                float dy_3 = 3 * grid_ypos * grid_ypos * (cubic_mu[coef_grid+12] + cubic_mu[coef_grid+13] * grid_xpos + cubic_mu[coef_grid+14] * grid_xpos * grid_xpos + cubic_mu[coef_grid+15] * grid_xpos * grid_xpos * grid_xpos
+                    + grid_zpos*(cubic_mu[coef_grid+28] + cubic_mu[coef_grid+29] * grid_xpos + cubic_mu[coef_grid+30] * grid_xpos * grid_xpos + cubic_mu[coef_grid+31] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*(cubic_mu[coef_grid+44] + cubic_mu[coef_grid+45] * grid_xpos + cubic_mu[coef_grid+46] * grid_xpos * grid_xpos + cubic_mu[coef_grid+47] * grid_xpos * grid_xpos * grid_xpos)
+                    + grid_zpos*grid_zpos*grid_zpos*(cubic_mu[coef_grid+60] + cubic_mu[coef_grid+61] * grid_xpos + cubic_mu[coef_grid+62] * grid_xpos * grid_xpos + cubic_mu[coef_grid+63] * grid_xpos * grid_xpos * grid_xpos));
+                f_y += -1 * emap_weight * (dy_1 + dy_2 + dy_3)/(grid_x[1]-grid_x[0]) ;
+            }
 
-        float f_z = -1 * emap_weight * ((v_001 - v_000) * grid_x_pos * grid_y_pos 
-                  + (v_101 - v_100) * grid_xpos * grid_y_pos
-                  + (v_011 - v_010) * grid_x_pos * grid_ypos
-                  + (v_111 - v_110) * grid_xpos * grid_ypos)/((grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0])*(grid_x[1]-grid_x[0]))   ;
-        // for (int grid_index = blockIdx.y*blockDim.y+threadIdx.y; grid_index < numEmapGrids; grid_index+=blockDim.y*gridDim.y)
-        // {
-        //     float3 diff = trimTo3(posq[atomIndex]) - grids[grid_index];
-        //     float diffSquared = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
-        //     float r = SQRT(diffSquared);
-        //     float blurred = bandwidth[grid_index] * bandwidth[grid_index] + (1-blur[grid_index]) * (1-blur[grid_index]);
-        //     energy += emap_weight * mu[grid_index] * exp(-1 * diffSquared / (2 * blurred));
-        //     if (r > 0) {
-        //         f += emap_weight * mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * diff;
-        //     }
-        //     __syncthreads();
-        // }
-        
-        forceBuffer[index] = make_float3(f_x,f_y,f_z);
-        energies[globalIndex] += energy;
-        __syncthreads();
-    }
+            forceBuffer[index] = make_float3(f_x,f_y,f_z);
+            energies[index_global] += energy;
+            __syncthreads();
+        }
+
 }
+
                             
 extern "C" __global__ void evaluateAndActivate(
         const int numGroups,
@@ -893,7 +971,6 @@ extern "C" __global__ void evaluateAndActivateCollections(
     const int tid = threadIdx.x;
     const int warp = tid / 32;
     const int lane = tid % 32;  // which thread are we within this warp
-
     // shared memory:
     // energyBuffer: maxCollectionSize floats
     // min/max Buffer: gridDim.x floats
@@ -910,7 +987,6 @@ extern "C" __global__ void evaluateAndActivateCollections(
         // we need to find the value of the cutoff energy below, then we will
         // activate all groups with lower energy
         float energyCutoff = 0.0;
-
         int numActive = numActiveArray[collIndex];
         int start = boundsArray[collIndex].x;
         int end = boundsArray[collIndex].y;
@@ -927,7 +1003,6 @@ extern "C" __global__ void evaluateAndActivateCollections(
         float min = minBuffer[0];
         float max = maxBuffer[0];
         float delta = max - min;
-
 
         // If all of the energies are the same, they should all be active.
         // Note: we need to break out here in this case, as otherwise delta
@@ -1371,6 +1446,7 @@ extern "C" __global__ void applyGMMRest(unsigned long long * __restrict__ force,
 extern "C" __global__ void applyEmapRest(unsigned long long * __restrict__ force,
                                          mixed* __restrict__ energyBuffer,
                                          const int* __restrict__ atomIndices,
+                                         const int* __restrict__ emapAtomList, 
                                          const int* __restrict__ globalIndices,
                                          const float* __restrict__ globalEnergies,
                                          const float* __restrict__ globalActive,
@@ -1379,21 +1455,25 @@ extern "C" __global__ void applyEmapRest(unsigned long long * __restrict__ force
                                          const int numEmapAtoms) {
     int threadIndex = blockIdx.x * blockDim.x + threadIdx.x;
     float energyAccum = 0.0;
+    // add force to each atom if the restraint it belongs to is active
     for (int restraintIndex=blockIdx.x*blockDim.x+threadIdx.x; restraintIndex<numEmapAtoms; restraintIndex+=blockDim.x*gridDim.x) {
         int index1 = atomIndices[restraintIndex];
         float3 f = restForces[restraintIndex];
-
-
-        atomicAdd(&force[index1], static_cast<unsigned long long>((long long) (f.x*0x100000000)));
-        atomicAdd(&force[index1  + PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.y*0x100000000)));
-        atomicAdd(&force[index1 + 2 * PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.z*0x100000000)));
+        for (int atom_list=blockIdx.y*blockDim.y+threadIdx.y; atom_list < numEmapRestraints; atom_list+=blockDim.y*gridDim.y) {
+            const int globalIndex = globalIndices[atom_list];
+            if ((restraintIndex - emapAtomList[atom_list] >= 0) && (restraintIndex - emapAtomList[atom_list+1] < 0) && (globalActive[globalIndex])) {
+                atomicAdd(&force[index1], static_cast<unsigned long long>((long long) (f.x*0x100000000)));
+                atomicAdd(&force[index1  + PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.y*0x100000000)));
+                atomicAdd(&force[index1 + 2 * PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.z*0x100000000)));
+            }
         }
+    }
     for (int restraintIndex=blockIdx.x*blockDim.x+threadIdx.x; restraintIndex<numEmapRestraints; restraintIndex+=blockDim.x*gridDim.x) {
         int globalIndex = globalIndices[restraintIndex];
-        energyBuffer[threadIndex] += globalEnergies[globalIndex];
+        if (globalActive[globalIndex]) {
+            energyAccum += globalEnergies[globalIndex];
         }
-    
-    // }
-    // energyBuffer[threadIndex] += energyAccum;
-    // printf("energyAccum: %f \n",energyAccum);
+    }
+    energyBuffer[threadIndex] += energyAccum;
+    float3 f = restForces[threadIndex];
 }

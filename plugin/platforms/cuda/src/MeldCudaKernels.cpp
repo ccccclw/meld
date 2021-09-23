@@ -136,8 +136,11 @@ CudaCalcMeldForceKernel::CudaCalcMeldForceKernel(std::string name, const Platfor
     emapGridPosx = nullptr;
     emapGridPosy = nullptr;
     emapGridPosz = nullptr;
+    emapCubic = nullptr;
     emapMu = nullptr;
+    emapCubicMu = nullptr;
     emapAtomIndices = nullptr;
+    emapAtomList = nullptr;
     emap_weights = nullptr;
     emapGlobalIndices = nullptr;
     emapRestForces = nullptr; 
@@ -199,8 +202,11 @@ CudaCalcMeldForceKernel::~CudaCalcMeldForceKernel() {
     delete emapGridPosx;
     delete emapGridPosy;
     delete emapGridPosz;
+    delete emapCubic;
     delete emapMu;
+    delete emapCubicMu;
     delete emapAtomIndices;
+    delete emapAtomList;
     delete emap_weights;
     delete emapGlobalIndices;
     delete emapRestForces; 
@@ -234,7 +240,6 @@ void CudaCalcMeldForceKernel::allocateMemory(const MeldForce& force) {
     numRestraints = force.getNumTotalRestraints();
     numGroups = force.getNumGroups();
     numCollections = force.getNumCollections();
-
     // setup device memory
     if (numDistRestraints > 0) {
         distanceRestRParams        = CudaArray::create<float4> ( cu, numDistRestraints, "distanceRestRParams");
@@ -297,8 +302,11 @@ void CudaCalcMeldForceKernel::allocateMemory(const MeldForce& force) {
         emapGridPosx               = CudaArray::create<float>  (cu,  calcNumGrids(force).x,          "emapGridPos");
         emapGridPosy               = CudaArray::create<float>  (cu,  calcNumGrids(force).y,          "emapGridPos");
         emapGridPosz               = CudaArray::create<float>  (cu,  calcNumGrids(force).z,          "emapGridPos");
-        emapMu                     = CudaArray::create<float>  (cu,  calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z,   "emapMu");
+        emapCubic                  = CudaArray::create<int>    (cu,  1,   "emapCubic");
+        emapMu                     = CudaArray::create<float>  (cu,  numEmapRestraints * calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z,   "emapMu");
+        emapCubicMu                = CudaArray::create<float>  (cu,  (calcNumGrids(force).x-1) * (calcNumGrids(force).y-1) * (calcNumGrids(force).z-1)*64,   "emapCubicMu");
         emap_weights               = CudaArray::create<float>  (cu,  calcNumEmapAtoms(force),        "emap_weights");
+        emapAtomList               = CudaArray::create<int>    (cu,  numEmapRestraints+1,            "emapAtomList");
         emapGlobalIndices          = CudaArray::create<int>    (cu,  numEmapRestraints,              "emapGlobalIndices");
         emapRestForces             = CudaArray::create<float3> (cu,  calcNumEmapAtoms(force),        "emapRestForces");
     }
@@ -353,8 +361,11 @@ void CudaCalcMeldForceKernel::allocateMemory(const MeldForce& force) {
     h_emapGridPosx                        = std::vector<float>  (calcNumGrids(force).x, 0);
     h_emapGridPosy                        = std::vector<float>  (calcNumGrids(force).y, 0);
     h_emapGridPosz                        = std::vector<float>  (calcNumGrids(force).z, 0);
-    h_emapMu                              = std::vector<float>  (calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z, 0);
+    h_emapCubic                           = std::vector<int>    (1, 0);
+    h_emapMu                              = std::vector<float>  (numEmapRestraints * calcNumGrids(force).x * calcNumGrids(force).y * calcNumGrids(force).z, 0);
+    h_emapCubicMu                         = std::vector<float>  ((calcNumGrids(force).x-1) * (calcNumGrids(force).y-1) * (calcNumGrids(force).z-1)*64, 0);
     h_emapAtomIndices                     = std::vector<int>    (calcNumEmapAtoms(force), -1);
+    h_emapAtomList                        = std::vector<int>    (numEmapRestraints+1, -1);
     h_emap_weights                        = std::vector<float>  (calcNumEmapAtoms(force), 0);
     h_emapGlobalIndices                   = std::vector<int>    (numEmapRestraints, -1);
     h_groupRestraintIndices               = std::vector<int>    (numRestraints, -1);
@@ -731,20 +742,26 @@ void CudaCalcMeldForceKernel::setupGMMRestraints(const MeldForce& force){
 
 void CudaCalcMeldForceKernel::setupEmapRestraints(const MeldForce &force)
 {
+    // the current script supports multiple emap restraints with corresponding density maps,
+    // for each emap restraint, it contains the atoms got affected, the grid potential (mu) on density map.
+    // emapAtomList is defined to store how many atoms in each emap restraint,
+    // e.g. restraint_0 has 2 atoms and restraint_1 has 3 atoms, the emapAtomList will be [0,2,5]
+    // all grid potentials for all density maps are stored as a single vector. It will check the atom is in which atom set
+    // to determine which density map potential (mu) it should use.
     int numAtoms = system.getNumParticles();
     std::string restType = "emap restraint";
     int atomset = 0;
+    h_emapAtomList[0] = 0;
     for (int i = 0; i < numEmapRestraints; ++i)
     {
         int global_index;
+        int cubic; 
         std::vector<int> atom;
-        std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
-        force.getEmapRestraintParams(i, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        std::vector<double> mu,cubic_mu,gridpos_x, gridpos_y, gridpos_z;
+        force.getEmapRestraintParams(i, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        h_emapCubic[0] = cubic;
         for (int d = 0; d < gridpos_x.size(); ++d) {
             h_emapGridPosx[d] = gridpos_x[d];
-            // h_emapMu[d] = mu[d];
-            // h_emapBlur[d] = blur[d];
-            // h_emapBandwidth[d] = bandwidth[d];
         }
         for (int d = 0; d < gridpos_y.size(); ++d) {
             h_emapGridPosy[d] = gridpos_y[d];
@@ -752,16 +769,22 @@ void CudaCalcMeldForceKernel::setupEmapRestraints(const MeldForce &force)
         for (int d = 0; d < gridpos_z.size(); ++d) {
             h_emapGridPosz[d] = gridpos_z[d];
         }
-        for (int d = 0; d < gridpos_x.size()*gridpos_y.size()*gridpos_z.size(); ++d) {
-            h_emapMu[d] = mu[d];
+        if (cubic) {
+            for (int d = 0; d < (gridpos_x.size()-1)*(gridpos_y.size()-1)*(gridpos_z.size()-1)*64; ++d) {
+                h_emapCubicMu[d] = cubic_mu[d];
+            }
+        } else {
+            for (int d = 0; d < gridpos_x.size()*gridpos_y.size()*gridpos_z.size(); ++d) {
+                h_emapMu[i*gridpos_x.size()*gridpos_y.size()*gridpos_z.size()+d] = mu[d];
+            }
         }
-        for (int a = 0; a < atom.size(); ++a){
+        for (int a = 0; a < atom.size(); ++a) {
             h_emap_weights[a+atomset] = system.getParticleMass(atom[a]);
             h_emapAtomIndices[a+atomset] = atom[a];
         }
         h_emapGlobalIndices[i] = global_index; 
         atomset+=atom.size();
-    
+        h_emapAtomList[i+1] = atomset;
     }
 }
 
@@ -877,22 +900,30 @@ int CudaCalcMeldForceKernel::calcSizeGMMData(const MeldForce& force) {
 int3 CudaCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
 {
     int global_index;
+    int cubic;
     std::vector<int> atom;
-    std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
+    std::vector<double> mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z;
+    int x_size = 1;
+    int y_size = 1;
+    int z_size = 1;
     if (numEmapRestraints > 0) {
-        force.getEmapRestraintParams(0, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        force.getEmapRestraintParams(0, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        x_size = gridpos_x.size();
+        y_size = gridpos_y.size();
+        z_size = gridpos_z.size();
     }
-    return make_int3(gridpos_x.size(),gridpos_y.size(),gridpos_z.size());
+    return make_int3(x_size,y_size,z_size);
 }
 
 int CudaCalcMeldForceKernel::calcNumEmapAtoms(const MeldForce &force)
 {
     int total = 0;
     int global_index;
+    int cubic;
     std::vector<int> atom;
-    std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
+    std::vector<double> mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z;
     for (int i=0; i<force.getNumEmapRestraints(); ++i) {
-        force.getEmapRestraintParams(i, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        force.getEmapRestraintParams(i, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
         total += atom.size();
     }
     return total;
@@ -953,8 +984,11 @@ void CudaCalcMeldForceKernel::validateAndUpload() {
         emapGridPosx->upload(h_emapGridPosx);
         emapGridPosy->upload(h_emapGridPosy);
         emapGridPosz->upload(h_emapGridPosz);
+        emapCubic->upload(h_emapCubic);
         emapMu->upload(h_emapMu);
+        emapCubicMu->upload(h_emapCubicMu);
         emapAtomIndices->upload(h_emapAtomIndices);
+        emapAtomList->upload(h_emapAtomList);
         emap_weights->upload(h_emap_weights);
         emapGlobalIndices->upload(h_emapGlobalIndices);
     }
@@ -1139,8 +1173,11 @@ double CudaCalcMeldForceKernel::execute(ContextImpl& context, bool includeForces
             &emapGridPosx->getDevicePointer(),
             &emapGridPosy->getDevicePointer(),
             &emapGridPosz->getDevicePointer(),
+            &emapCubic->getDevicePointer(),
             &emapMu->getDevicePointer(),
+            &emapCubicMu->getDevicePointer(),
             &emap_weights->getDevicePointer(),
+            &emapAtomList->getDevicePointer(),
             &emapGlobalIndices->getDevicePointer(),
             &restraintEnergies->getDevicePointer(),
             &emapRestForces->getDevicePointer(),
@@ -1149,62 +1186,61 @@ double CudaCalcMeldForceKernel::execute(ContextImpl& context, bool includeForces
             &numEmapAtoms};
         cu.executeKernel(computeEmapRestKernel, emapArgs, numEmapAtoms);
     }
-    if (numEmapRestraints == 0) {
-        // now evaluate and active restraints based on groups
-        int sharedSizeGroup = largestGroup * (sizeof(float) + sizeof(int));
-        int sharedSizeThreads = 32 * sizeof(float);
-        int sharedSize = std::max(sharedSizeGroup, sharedSizeThreads);
+    // now evaluate and active restraints based on groups
+    int sharedSizeGroup = largestGroup * (sizeof(float) + sizeof(int));
+    int sharedSizeThreads = 32 * sizeof(float);
+    int sharedSize = std::max(sharedSizeGroup, sharedSizeThreads);
 
-        void* groupArgs[] = {
-            &numGroups,
-            &groupNumActive->getDevicePointer(),
-            &groupBounds->getDevicePointer(),
-            &groupRestraintIndices->getDevicePointer(),
-            &groupRestraintIndicesTemp->getDevicePointer(),
-            &restraintEnergies->getDevicePointer(),
-            &restraintActive->getDevicePointer(),
-            &groupEnergies->getDevicePointer()};
-        cu.executeKernel(evaluateAndActivateKernel, groupArgs, 32 * numGroups, groupsPerBlock * 32, groupsPerBlock * sharedSize);
+    void* groupArgs[] = {
+        &numGroups,
+        &groupNumActive->getDevicePointer(),
+        &groupBounds->getDevicePointer(),
+        &groupRestraintIndices->getDevicePointer(),
+        &groupRestraintIndicesTemp->getDevicePointer(),
+        &restraintEnergies->getDevicePointer(),
+        &restraintActive->getDevicePointer(),
+        &groupEnergies->getDevicePointer()};
+    cu.executeKernel(evaluateAndActivateKernel, groupArgs, 32 * numGroups, groupsPerBlock * 32, groupsPerBlock * sharedSize);
 
-        // the kernel will need to be modified if this value is changed
-        const int threadsPerCollection = 1024;
-        int sharedSizeCollectionEnergies = largestCollection * sizeof(float);
-        int sharedSizeCollectionMinMaxBuffer = threadsPerCollection * 2 * sizeof(float);
-        int sharedSizeCollectionBinCounts = threadsPerCollection * sizeof(int);
-        int sharedSizeCollectionBestBin = sizeof(int);
-        int sharedSizeCollection = sharedSizeCollectionEnergies + sharedSizeCollectionMinMaxBuffer +
-            sharedSizeCollectionBinCounts + sharedSizeCollectionBestBin;
-        // set collectionsEncounteredNaN to zero and upload it
-        h_collectionEncounteredError[0] = 0;
-        collectionEncounteredError->upload(h_collectionEncounteredError);
-        // now evaluate and activate groups based on collections
-        void* collArgs[] = {
-            &numCollections,
-            &collectionNumActive->getDevicePointer(),
-            &collectionBounds->getDevicePointer(),
-            &collectionGroupIndices->getDevicePointer(),
-            &groupEnergies->getDevicePointer(),
-            &groupActive->getDevicePointer(),
-            &collectionEncounteredError->getDevicePointer()};
-        cu.executeKernel(evaluateAndActivateCollectionsKernel, collArgs, threadsPerCollection*numCollections, threadsPerCollection, sharedSizeCollection);
-        // check if we encountered NaN
-        collectionEncounteredError->download(h_collectionEncounteredError);
-        if (h_collectionEncounteredError[0] == 1) {
-            throw OpenMMException("Encountered NaN when evaluating collections.");
-        } else if (h_collectionEncounteredError[0] == 2) {
-            throw OpenMMException("Could not find k'th highest element while evaluating collection.");
-        } else if (h_collectionEncounteredError[0]) {
-            throw OpenMMException("Unknown error occurred while handling collection.");
-        }
-
-        // Now set the restraints active based on if the groups are active
-        void* applyGroupsArgs[] = {
-            &groupActive->getDevicePointer(),
-            &restraintActive->getDevicePointer(),
-            &groupBounds->getDevicePointer(),
-            &numGroups};
-        cu.executeKernel(applyGroupsKernel, applyGroupsArgs, 32*numGroups, 32);
+    // the kernel will need to be modified if this value is changed
+    const int threadsPerCollection = 1024;
+    int sharedSizeCollectionEnergies = largestCollection * sizeof(float);
+    int sharedSizeCollectionMinMaxBuffer = threadsPerCollection * 2 * sizeof(float);
+    int sharedSizeCollectionBinCounts = threadsPerCollection * sizeof(int);
+    int sharedSizeCollectionBestBin = sizeof(int);
+    int sharedSizeCollection = sharedSizeCollectionEnergies + sharedSizeCollectionMinMaxBuffer +
+        sharedSizeCollectionBinCounts + sharedSizeCollectionBestBin;
+    // set collectionsEncounteredNaN to zero and upload it
+    h_collectionEncounteredError[0] = 0;
+    collectionEncounteredError->upload(h_collectionEncounteredError);
+    // now evaluate and activate groups based on collections
+    void* collArgs[] = {
+        &numCollections,
+        &collectionNumActive->getDevicePointer(),
+        &collectionBounds->getDevicePointer(),
+        &collectionGroupIndices->getDevicePointer(),
+        &groupEnergies->getDevicePointer(),
+        &groupActive->getDevicePointer(),
+        &collectionEncounteredError->getDevicePointer()};
+    cu.executeKernel(evaluateAndActivateCollectionsKernel, collArgs, threadsPerCollection*numCollections, threadsPerCollection, sharedSizeCollection);
+    // check if we encountered NaN
+    collectionEncounteredError->download(h_collectionEncounteredError);
+    if (h_collectionEncounteredError[0] == 1) {
+        throw OpenMMException("Encountered NaN when evaluating collections.");
+    } else if (h_collectionEncounteredError[0] == 2) {
+        throw OpenMMException("Could not find k'th highest element while evaluating collection.");
+    } else if (h_collectionEncounteredError[0]) {
+        throw OpenMMException("Unknown error occurred while handling collection.");
     }
+
+    // Now set the restraints active based on if the groups are active
+    void* applyGroupsArgs[] = {
+        &groupActive->getDevicePointer(),
+        &restraintActive->getDevicePointer(),
+        &groupBounds->getDevicePointer(),
+        &numGroups};
+    cu.executeKernel(applyGroupsKernel, applyGroupsArgs, 32*numGroups, 32);
+
     // Now apply the forces and energies if the restraints are active
     if (numDistRestraints > 0) {
         void* applyDistRestArgs[] = {
@@ -1294,6 +1330,7 @@ double CudaCalcMeldForceKernel::execute(ContextImpl& context, bool includeForces
             &cu.getForce().getDevicePointer(),
             &cu.getEnergyBuffer().getDevicePointer(),
             &emapAtomIndices->getDevicePointer(),
+            &emapAtomList->getDevicePointer(),
             &emapGlobalIndices->getDevicePointer(),
             &restraintEnergies->getDevicePointer(),
             &restraintActive->getDevicePointer(),

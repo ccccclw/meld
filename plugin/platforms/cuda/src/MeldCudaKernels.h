@@ -226,11 +226,20 @@ private:
     OpenMM::CudaArray* emapGridPosz;
     std::vector<float> h_emapGridPosz;
 
+    OpenMM::CudaArray* emapCubic;
+    std::vector<int> h_emapCubic;
+
     OpenMM::CudaArray* emapMu;
     std::vector<float> h_emapMu;
 
+    OpenMM::CudaArray* emapCubicMu;
+    std::vector<float> h_emapCubicMu;
+
     OpenMM::CudaArray* emapAtomIndices;
     std::vector<int> h_emapAtomIndices;
+
+    OpenMM::CudaArray* emapAtomList;
+    std::vector<int> h_emapAtomList;
 
     OpenMM::CudaArray* emap_weights;
     std::vector<float> h_emap_weights;

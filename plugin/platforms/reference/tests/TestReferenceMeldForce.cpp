@@ -779,31 +779,37 @@ void testGMMRest3Pair2Component() {
 }
 
 void testEmapRest() {
-    const int numParticles = 1;
+    const int numParticles = 2;
     System system;
     vector<Vec3> positions(numParticles);
+    system.addParticle(1.0);
     system.addParticle(1.0);
 
     MeldForce* force = new MeldForce();
     int nGrids = 8;
-    std::vector<double> mu(nGrids);
-    std::vector<double> blur(nGrids);
-    std::vector<double> bandwidth(nGrids);
-    std::vector<double> grid_x(nGrids);
-    std::vector<double> grid_y(nGrids);
-    std::vector<double> grid_z(nGrids);
-    mu[0] = 0.4; mu[1] = 0.4; mu[2] = 0.4; mu[3] = 0.4; mu[4] = 0.4; mu[5] = 0.4; mu[6] = 0.4; mu[7] = 0.0; 
-    for(int i=0; i<mu.size(); i++) { blur[i]=0; };
-    for(int i=0; i<mu.size(); i++) { bandwidth[i]=0.5; };
-    grid_x[0] = 0; grid_x[1] = 0; grid_x[2] = 1; grid_x[3] = 1; grid_x[4] = 0; grid_x[5] = 0; grid_x[6] = 1; grid_x[7] = 1; 
-    grid_y[0] = 0; grid_y[1] = 1; grid_y[2] = 0; grid_y[3] = 1; grid_y[4] = 0; grid_y[5] = 1; grid_y[6] = 0; grid_y[7] = 1; 
-    grid_z[0] = 0; grid_z[1] = 0; grid_z[2] = 0; grid_z[3] = 0; grid_z[4] = 1; grid_z[5] = 1; grid_z[6] = 1; grid_z[7] = 1; 
-    
-    
-    int restIdx = force->addEmapRestraint(0,mu,blur,bandwidth,grid_x,grid_y,grid_z);
-    std::vector<int> restIndices(1);
-    restIndices[0] = restIdx;
-    int groupIdx = force->addGroup(restIndices, 1);
+    std::vector<int> particle_list_0(1);
+    std::vector<int> particle_list_1(1);
+    std::vector<double> mu_0(nGrids);
+    std::vector<double> mu_1(nGrids);
+    std::vector<double> cubic_mu(nGrids);
+    std::vector<double> grid_x(2);
+    std::vector<double> grid_y(2);
+    std::vector<double> grid_z(2);
+    particle_list_0[0]=0;
+    particle_list_1[0]=1;
+    mu_0[0] = 0.2; mu_0[1] = 0.2; mu_0[2] = 0.2; mu_0[3] = 0.2; mu_0[4] = 0.2; mu_0[5] = 0.2; mu_0[6] = 0.2; mu_0[7] = 0.0; 
+    mu_1[0] = 0.0; mu_1[1] = 0.4; mu_1[2] = 0.4; mu_1[3] = 0.4; mu_1[4] = 0.4; mu_1[5] = 0.4; mu_1[6] = 0.4; mu_1[7] = 0.4; 
+
+    for(int i=0; i<cubic_mu.size(); i++) { cubic_mu[i]=0; };
+    grid_x[0] = 0; grid_x[1] = 0.1; 
+    grid_y[0] = 0; grid_y[1] = 0.1; 
+    grid_z[0] = 0; grid_z[1] = 0.1; 
+    int restIdx_0 = force->addEmapRestraint(particle_list_0,0,mu_0,cubic_mu,grid_x,grid_y,grid_z);
+    int restIdx_1 = force->addEmapRestraint(particle_list_1,0,mu_1,cubic_mu,grid_x,grid_y,grid_z);
+    std::vector<int> restIndices(2);
+    restIndices[0] = restIdx_0;
+    restIndices[1] = restIdx_1;
+    int groupIdx = force->addGroup(restIndices, 2);
     std::vector<int> groupIndices(1);
     groupIndices[0] = groupIdx;
     force->addCollection(groupIndices, 1);
@@ -812,28 +818,27 @@ void testEmapRest() {
     VerletIntegrator integ(1.0);
     Platform& platform = Platform::getPlatformByName("Reference");
     Context context(system, integ, platform);
-    for(float a=1; a<100; a++)
-    {
-        for(float b=1; b<100; b++)
-        {
-            for(float c=1; c<100; c++)
-            {
-                positions[0] = Vec3(a/100, b/100, c/100);
-                context.setPositions(positions);
-                State stateI = context.getState(State::Energy | State::Forces);
-                cout << "pos: " << positions[0] << endl;
-                // cout << "emapE: " << stateI.getPotentialEnergy() << endl;
-                // cout << "emapF: " << stateI.getForces()[0] << endl;
-            };
-        };
-    };
-    // positions[0] = Vec3(0.3, 0.4, 0.5);
-    // context.setPositions(positions);
-    // State stateI = context.getState(State::Energy | State::Forces);
-    // cout << "emapE: " << stateI.getPotentialEnergy() << endl;
-    // cout << "emapF: " << stateI.getForces()[0] << endl;
-
-
+    positions[0] = Vec3(0.03, 0.04, 0.05);
+    positions[1] = Vec3(0.04, 0.05, 0.06);
+    context.setPositions(positions);
+    State stateI = context.getState(State::Energy | State::Forces);
+    
+    //  V_{xyz} = atom_mass * (1/L^3)(V_{000}(x_max-x)(y_max-y)(z_max-z) + 
+    //            V_{100}x(y_max-y)(z_max-z) + 
+    //            V_{010}(x_max-x)y(z_max-z) + 
+    //            V_{001}(x_max-x)(y_max-y)z + 
+    //            V_{101}x(y_max-y)z + 
+    //            V_{011}(x_max-x)yz + 
+    //            V_{110}xy(z_max-z) + 
+    //            V_{111}xyz)  (L is the grid length)
+    //  V_total = V_0 + V_1 = 0.188 + 0.352 = 0.54
+    //  F_0 = -(dV/dx,dV/dy,dV/dz) = (V_{011}yz/L, V_{101}xz/L, V_{110}xy/L) = (0.4,0.3,0.24)
+    float expectedEnergy = 0.54;
+    Vec3 expectedForce1 = Vec3(0.4,0.3,0.24);
+    Vec3 expectedForce2 = Vec3(-0.8,-0.96,-1.2);
+    ASSERT_EQUAL_TOL(expectedEnergy, stateI.getPotentialEnergy(), 1e-5);
+    ASSERT_EQUAL_VEC(expectedForce1, stateI.getForces()[0], 1e-5);
+    ASSERT_EQUAL_VEC(expectedForce2, stateI.getForces()[1], 1e-5);
 }
 
 void testGroupSelectsCorrectly() {

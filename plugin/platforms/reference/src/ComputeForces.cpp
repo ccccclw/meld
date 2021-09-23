@@ -284,59 +284,88 @@ void computeGMMRest(
 void computeEmapRest(
     vector<RealVec> &pos,
     vector<int> &atomIndices,
-    vector<float3> &grids,
+    vector<float> &grid_x,
+    vector<float> &grid_y,
+    vector<float> &grid_z,
     vector<float> &mu,
-    vector<float> &blur,
-    vector<float> &bandwidth,
     vector<float> &emap_weights,
     vector<float> &energies,
+    vector<int> &emapAtomList,
     vector<int> &indexToGlobal,
     vector<float3> &forceBuffer,
-    int numRestraints)
+    int numRestraints,
+    int3 numEmapGrids,
+    int numEmapAtoms)
 {
-    for (int index = 0; index < numRestraints ; index++)
+    for (int res=0; res < numRestraints; res++) {
+        int globalIndex = indexToGlobal[res];
+        energies[globalIndex]=0;
+    }
+    for (int index = 0; index < numEmapAtoms ; index++)
     {
         // get my global index
-        const int globalIndex = indexToGlobal[index];
-        int atomIndex = atomIndices[index];
-        int numGrids = grids.size();
-        float emap_weight = emap_weights[index];
-        //compute force and energy
-        float energy = 0.0;
-        float dEdR = 0.0;
-        RealVec f = RealVec(0.0,0.0,0.0);
-        int tmp_index;
-        float tmp_distance = 100.0 ;
-        vector< pair <float,int> > sort_near_grid;
-        for (int grid_index = 0; grid_index < numGrids; grid_index++)
-        {
-            RealVec diff = pos[atomIndex] - Float3ToVec3(grids[grid_index]);
-            float3 grids_tmp = grids[grid_index];
-            float diffSquared = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
-            float r = SQRT(diffSquared);
-            sort_near_grid.push_back(make_pair(r, grid_index));
-            if ((mu[grid_index] - 0.3) < -0.001 && r <= tmp_distance){
-                tmp_index = grid_index;
-                tmp_distance = r;
+        int index_global;
+        int mu_index;
+        for (int atom_list=0; atom_list < numRestraints; atom_list++) {
+            const int globalIndex = indexToGlobal[atom_list];
+            if ((index - emapAtomList[atom_list] >= 0) && (index - emapAtomList[atom_list+1] < 0)) {
+                index_global = globalIndex;
+                mu_index = atom_list;
             }
-            float blurred = bandwidth[grid_index] * bandwidth[grid_index] + (1-blur[grid_index]) * (1-blur[grid_index]);
-            energy += emap_weight * mu[grid_index] * exp(-1 * diffSquared / (2 * blurred));
-            // cout << "tmp_energy: " <<  energy << endl;
-            if (r > 0) {
-                // dEdR = mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * r;
-                f += emap_weight * mu[grid_index] / (blurred) * exp(-1 * diffSquared / (2 * blurred)) * diff;
-                // f += RealVec(diff[0] * dEdR / r, diff[1] * dEdR / r, diff[2] * dEdR / r);
-                // cout << "checktmp_F: " <<  f << endl;
-            }
-        
         }
-        cout << "blur: " <<  blur[0] << endl;
-        forceBuffer[index] = RealVecToFloat3(f);
-        energies[index] = energy;
-        cout << "fenergy: " <<  energy << endl;
-        cout << "fforce: " <<  f << endl;
+        int atomIndex = atomIndices[index];
+        float emap_weight = emap_weights[index];
+        float3 atom_pos = RealVecToFloat3(pos[atomIndex]);
+        float atom_posx = get<0>(atom_pos);
+        float atom_posy = get<1>(atom_pos);
+        float atom_posz = get<2>(atom_pos);
+        int grid_xmax = get<0>(numEmapGrids);
+        int grid_ymax = get<1>(numEmapGrids);
+        int grid_zmax = get<2>(numEmapGrids);
+        int mu_num = grid_xmax*grid_ymax*grid_zmax;
+        int grid_xnum = floor(( atom_posx-grid_x[0])/(grid_x[1]-grid_x[0])) + 1;
+        int grid_ynum = floor(( atom_posy-grid_y[0])/(grid_y[1]-grid_y[0])) + 1;
+        int grid_znum = floor(( atom_posz-grid_z[0])/(grid_z[1]-grid_z[0])) + 1;
+        float grid_x_pos = (grid_x[grid_xnum]-atom_posx)/(grid_x[1]-grid_x[0]);
+        float grid_y_pos = (grid_y[grid_ynum]-atom_posy)/(grid_y[1]-grid_y[0]);
+        float grid_z_pos = (grid_z[grid_znum]-atom_posz)/(grid_z[1]-grid_z[0]);
+        float grid_xpos = (atom_posx-grid_x[grid_xnum-1])/(grid_x[1]-grid_x[0]);
+        float grid_ypos = (atom_posy-grid_y[grid_ynum-1])/(grid_y[1]-grid_y[0]);
+        float grid_zpos = (atom_posz-grid_z[grid_znum-1])/(grid_z[1]-grid_z[0]);
+        float v_000 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+        float v_100 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+        float v_010 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+        float v_001 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
+        float v_101 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum];
+        float v_011 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum -1];
+        float v_110 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum ];
+        float v_111 = mu[mu_num*mu_index+grid_znum * grid_ymax * grid_xmax + grid_ynum * grid_xmax + grid_xnum];
+        float energy = emap_weight * (v_000 * grid_x_pos * grid_y_pos * grid_z_pos              
+                + v_100 * grid_xpos * grid_y_pos * grid_z_pos 
+                + v_010 * grid_x_pos * grid_ypos * grid_z_pos   
+                + v_001 * grid_x_pos * grid_y_pos * grid_zpos
+                + v_101 * grid_xpos * grid_y_pos * grid_zpos 
+                + v_011 * grid_x_pos * grid_ypos * grid_zpos
+                + v_110 * grid_xpos * grid_ypos * grid_z_pos           
+                + v_111 * grid_xpos * grid_ypos * grid_zpos)   ;
+        float f_x = -1 * emap_weight * ((v_100 - v_000) * grid_y_pos * grid_z_pos 
+                + (v_110 - v_010) * grid_ypos * grid_z_pos
+                + (v_101 - v_001) * grid_y_pos * grid_zpos
+                + (v_111 - v_011) * grid_ypos * grid_zpos)/(grid_x[1]-grid_x[0])   ;
+                
+        float f_y = -1 * emap_weight * ((v_010 - v_000) * grid_x_pos * grid_z_pos 
+                + (v_110 - v_100) * grid_xpos * grid_z_pos
+                + (v_011 - v_001) * grid_x_pos * grid_zpos
+                + (v_111 - v_101) * grid_xpos * grid_zpos)/(grid_x[1]-grid_x[0])  ;
+
+        float f_z = -1 * emap_weight * ((v_001 - v_000) * grid_x_pos * grid_y_pos 
+                + (v_101 - v_100) * grid_xpos * grid_y_pos
+                + (v_011 - v_010) * grid_x_pos * grid_ypos
+                + (v_111 - v_110) * grid_xpos * grid_ypos)/(grid_x[1]-grid_x[0])   ;
+
+        forceBuffer[index] = float3(f_x,f_y,f_z);;
+        energies[index_global] += energy;
     }
-    cout << "---------------------" << endl;
 }
 
 void evaluateAndActivate(
@@ -563,25 +592,35 @@ float applyGMMRest(
 
 float applyEmapRest(
     vector<RealVec> &force,
+    vector<int> &emapAtomList,
     vector<int> &emapRestAtomIndices,
     vector<int> &emapRestGlobalIndices,
     vector<float3> &emapRestForces,
     vector<float> &restraintEnergies,
-    int numEmapRestraints)
+    vector<bool> &restraintActive,
+    int numEmapRestraints,
+    int numEmapAtoms)
 {
     float totalEnergy = 0.0;
-    for (int i = 0; i < numEmapRestraints; i++)
+    for (int index = 0; index < numEmapAtoms; index++)
     {   
-        auto index = emapRestGlobalIndices[i];
-        float E_tmp = restraintEnergies[index];
-        // cout << "applyE: " << E_tmp << endl;
-        // cout << "applyF: " << Float3ToVec3(emapRestForces[index]) << endl;
-        totalEnergy += restraintEnergies[index];
-        auto fx = get<0>(emapRestForces[i]);
-        auto fy = get<1>(emapRestForces[i]);
-        auto fz = get<2>(emapRestForces[i]);
-        auto atom = emapRestAtomIndices[i];
-        force[atom] += Vec3(fx, fy, fz);
+        auto atom = emapRestAtomIndices[index];
+        for (int atom_list=0; atom_list < numEmapRestraints; atom_list++) {
+            int globalIndex = emapRestGlobalIndices[atom_list];
+            if ((index - emapAtomList[atom_list] >= 0) && (index - emapAtomList[atom_list+1] < 0) && (restraintActive[globalIndex])) {
+        
+                auto fx = get<0>(emapRestForces[index]);
+                auto fy = get<1>(emapRestForces[index]);
+                auto fz = get<2>(emapRestForces[index]);
+                force[atom] += Vec3(fx, fy, fz);
+            }
+        }
+    }
+    for (int restraintIndex=0; restraintIndex<numEmapRestraints; restraintIndex++) {
+        int globalIndex = emapRestGlobalIndices[restraintIndex];
+        if (restraintActive[globalIndex]){
+            totalEnergy+=restraintEnergies[globalIndex];
+        }
     }
     return totalEnergy;
 }

@@ -76,15 +76,18 @@ void computeGMMRest(
 void computeEmapRest(
     vector<RealVec> &pos,
     vector<int> &atomIndices,
-    vector<float3> &grids,
+    vector<float> &grid_x,
+    vector<float> &grid_y,
+    vector<float> &grid_z,
     vector<float> &mu,
-    vector<float> &blur,
-    vector<float> &bandwidth,
     vector<float> &emap_weights,
     vector<float> &energies,
+    vector<int> &emapAtomList,
     vector<int> &indexToGlobal,
     vector<float3> &forceBuffer,
-    int numRestraints);
+    int numRestraints,
+    int3 numEmapGrids,
+    int numEmapAtoms);
 
 void evaluateAndActivate(
     int numGroups,
@@ -167,8 +170,11 @@ float applyGMMRest(
 
 float applyEmapRest(
     vector<RealVec> &force,
+    vector<int> &emapAtomList,
     vector<int> &emapRestAtomIndices,
     vector<int> &emapRestGlobalIndices,
     vector<float3> &emapRestForces,
     vector<float> &restraintEnergies,
-    int numEmapRestraints);
+    vector<bool> &restraintActive,
+    int numEmapRestraints,
+    int numEmapAtoms);

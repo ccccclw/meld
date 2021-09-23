@@ -231,7 +231,9 @@ public:
      * 
      */
     void getEmapRestraintParams(int index, std::vector<int>& atom, 
+                                int& cubic,
                                 std::vector<double>& mu, 
+                                std::vector<double>& cubic_mu, 
                                 std::vector<double>& gridpos_x,
                                 std::vector<double>& gridpos_y,
                                 std::vector<double>& gridpos_z,
@@ -552,10 +554,10 @@ public:
      * Create a new Emap restraint.
      * 
      */
-    int addEmapRestraint(std::vector<int> particle, std::vector<double> mu,
+    int addEmapRestraint(std::vector<int> particle, int cubic, std::vector<double> mu,std::vector<double> cubic_mu,
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
 
-    void modifyEmapRestraint(int index, std::vector<int> particle, std::vector<double> mu,
+    void modifyEmapRestraint(int index, std::vector<int> particle, int cubic, std::vector<double> mu,std::vector<double> cubic_mu,
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z);
 
     
@@ -776,7 +778,9 @@ private:
     class EmapRestraintInfo {
     public:
         std::vector<int> particle;
+        int cubic;
         std::vector<double> mu;
+        std::vector<double> cubic_mu;
         std::vector<double> gridpos_x;
         std::vector<double> gridpos_y; 
         std::vector<double> gridpos_z;
@@ -786,9 +790,9 @@ private:
             // particle = -1;
             globalIndex = -1;
         }
-        EmapRestraintInfo(std::vector<int> particle, std::vector<double> mu, 
+        EmapRestraintInfo(std::vector<int> particle, int cubic, std::vector<double> mu, std::vector<double> cubic_mu, 
         std::vector<double> gridpos_x, std::vector<double> gridpos_y, std::vector<double> gridpos_z, int globalIndex): 
-        particle(particle), mu(mu), gridpos_x(gridpos_x), gridpos_y(gridpos_y), gridpos_z(gridpos_z), 
+        particle(particle), cubic(cubic), mu(mu), cubic_mu(cubic_mu), gridpos_x(gridpos_x), gridpos_y(gridpos_y), gridpos_z(gridpos_z), 
         globalIndex(globalIndex) {}
         
     };

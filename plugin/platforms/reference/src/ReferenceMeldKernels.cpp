@@ -173,6 +173,8 @@ ReferenceCalcMeldForceKernel::ReferenceCalcMeldForceKernel(std::string name, con
     numDistProfileRestraints = 0;
     numGMMRestraints = 0;
     numEmapRestraints = 0;
+    numEmapGrids = int3(0,0,0);
+    numEmapAtoms = 0;
     numRestraints = 0;
     numGroups = 0;
     numCollections = 0;
@@ -189,6 +191,8 @@ void ReferenceCalcMeldForceKernel::initialize(const System &system, const MeldFo
     numTorsProfileRestParams = force.getNumTorsProfileRestParams();
     numGMMRestraints = force.getNumGMMRestraints();
     numEmapRestraints = force.getNumEmapRestraints();
+    numEmapGrids = calcNumGrids(force);
+    numEmapAtoms = calcNumEmapAtoms(force);
     numRestraints = force.getNumTotalRestraints();
     numGroups = force.getNumGroups();
     numCollections = force.getNumCollections();
@@ -234,10 +238,11 @@ void ReferenceCalcMeldForceKernel::initialize(const System &system, const MeldFo
     gmmData = std::vector<float>(calcSizeGMMData(force), 0);
 
     emapAtomIndices = std::vector<int>(numEmapRestraints,-1);
-    emapGridPos = std::vector<float3>(calcNumGrids(force),float3(0, 0, 0));
-    emapMu = std::vector<float>(calcNumGrids(force), 0);
-    emapBlur = std::vector<float>(calcNumGrids(force), 0);
-    emapBandwidth = std::vector<float>(calcNumGrids(force), 0);
+    emapGridPosx = std::vector<float>(get<0>(calcNumGrids(force)),0);
+    emapGridPosy = std::vector<float>(get<1>(calcNumGrids(force)),0);
+    emapGridPosz = std::vector<float>(get<2>(calcNumGrids(force)),0);
+    emapMu = std::vector<float>(numEmapRestraints*get<0>(calcNumGrids(force))*get<1>(calcNumGrids(force))*get<2>(calcNumGrids(force)), 0);
+    emapAtomList = std::vector<int>(numEmapRestraints+1, -1);
     emap_weights = std::vector<float>(numEmapRestraints, 0);
     emapGlobalIndices = std::vector<int>(numEmapRestraints, -1);
     emapRestForces = std::vector<float3>(numEmapRestraints, float3(0, 0, 0));
@@ -369,15 +374,18 @@ double ReferenceCalcMeldForceKernel::execute(ContextImpl &context, bool includeF
         computeEmapRest(
             pos,
             emapAtomIndices,
-            emapGridPos,
+            emapGridPosx,
+            emapGridPosy,
+            emapGridPosz,
             emapMu,
-            emapBlur,
-            emapBandwidth,
             emap_weights,
             restraintEnergies,
+            emapAtomList,
             emapGlobalIndices,
             emapRestForces,
-            numEmapRestraints);
+            numEmapRestraints,
+            numEmapGrids,
+            numEmapAtoms);
     }
 
     // now evaluate and active restraints based on groups
@@ -487,11 +495,14 @@ double ReferenceCalcMeldForceKernel::execute(ContextImpl &context, bool includeF
     {
         energy += applyEmapRest(
             force,
+            emapAtomList,
             emapAtomIndices,
             emapGlobalIndices,
             emapRestForces,
             restraintEnergies,
-            numEmapRestraints);
+            restraintActive,
+            numEmapRestraints,
+            numEmapAtoms);
     }
 
     return energy;
@@ -562,14 +573,30 @@ int ReferenceCalcMeldForceKernel::calcSizeGMMData(const MeldForce &force)
     return total;
 }
 
-int ReferenceCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
+int3 ReferenceCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
 {
-    int atom, global_index;
-    std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
+    int global_index;
+    int cubic;
+    std::vector<int> atom;
+    std::vector<double> mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z;
     if (numEmapRestraints > 0) {
-        force.getEmapRestraintParams(0, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
+        force.getEmapRestraintParams(0, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
     }
-    return gridpos_x.size();
+    return int3(gridpos_x.size(),gridpos_y.size(),gridpos_z.size());
+}
+
+int ReferenceCalcMeldForceKernel::calcNumEmapAtoms(const MeldForce &force)
+{
+    int total = 0;
+    int global_index;
+    int cubic;
+    std::vector<int> atom;
+    std::vector<double> mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z;
+    for (int i=0; i<force.getNumEmapRestraints(); ++i) {
+        force.getEmapRestraintParams(i, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        total += atom.size();
+    }
+    return total;
 }
 
 void ReferenceCalcMeldForceKernel::setupDistanceRestraints(const MeldForce &force)
@@ -826,23 +853,44 @@ void ReferenceCalcMeldForceKernel::setupGMMRestraints(const MeldForce &force)
 
 void ReferenceCalcMeldForceKernel::setupEmapRestraints(const MeldForce &force)
 {
+    // the current script supports multiple emap restraints with corresponding density maps,
+    // for each emap restraint, it contains the atoms got affected, the grid potential (mu) on density map.
+    // emapAtomList is defined to store how many atoms in each emap restraint,
+    // e.g. restraint_0 has 2 atoms and restraint_1 has 3 atoms, the emapAtomList will be [0,2,5]
+    // all grid potentials for all density maps are stored as a single vector. It will check the atom is in which atom set
+    // to determine which density map potential (mu) it should use.
     int numAtoms = system.getNumParticles();
     std::string restType = "emap restraint";
+    int atomset = 0;
+    emapAtomList[0] = 0;
     for (int i = 0; i < numEmapRestraints; ++i)
     {
-        int atom, global_index;
-        std::vector<double> mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z;
-        force.getEmapRestraintParams(i, atom, mu, blur, bandwidth, gridpos_x, gridpos_y, gridpos_z, global_index);
-        checkAtomIndex(numAtoms, restType, atom, i, global_index);
+        int global_index;
+        int cubic; 
+        std::vector<int> atom;
+        std::vector<double> mu,cubic_mu,gridpos_x, gridpos_y, gridpos_z;
+        force.getEmapRestraintParams(i, atom, cubic, mu, cubic_mu, gridpos_x, gridpos_y, gridpos_z, global_index);
         for (int d = 0; d < gridpos_x.size(); ++d) {
-            emapGridPos[d] = float3(gridpos_x[d], gridpos_y[d], gridpos_z[d]);
-            emapMu[d] = mu[d];
-            emapBlur[d] = blur[d];
-            emapBandwidth[d] = bandwidth[d];
+            emapGridPosx[d] = gridpos_x[d];
         }
-        emapAtomIndices[i] = atom;
-        emap_weights[i] = system.getParticleMass(atom);
-        emapGlobalIndices[i] = global_index;
+        for (int d = 0; d < gridpos_y.size(); ++d) {
+            emapGridPosy[d] = gridpos_y[d];
+        }
+        for (int d = 0; d < gridpos_z.size(); ++d) {
+            emapGridPosz[d] = gridpos_z[d];
+        }
+        if (!cubic) {
+            for (int d = 0; d < gridpos_x.size()*gridpos_y.size()*gridpos_z.size(); ++d) {
+                emapMu[i*gridpos_x.size()*gridpos_y.size()*gridpos_z.size()+d] = mu[d];
+            }
+        }
+        for (int a = 0; a < atom.size(); ++a) {
+            emap_weights[a+atomset] = system.getParticleMass(atom[a]);
+            emapAtomIndices[a+atomset] = atom[a];
+        }
+        emapGlobalIndices[i] = global_index; 
+        atomset+=atom.size();
+        emapAtomList[i+1] = atomset;
     }
 }
 
