@@ -15,6 +15,7 @@ SET(OPENMM_DIR "/usr/local/openmm" CACHE PATH "Where OpenMM is installed")
 INCLUDE_DIRECTORIES("${OPENMM_DIR}/include")
 LINK_DIRECTORIES("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")
 SET(OPENMM_CUDA_COMPILER /apps/compilers/cuda/10.0.130/bin/nvcc)
+#SET(OPENMM_CUDA_COMPILER /apps/compilers/cuda/11.0.207/bin/nvcc)
 # Specify the C++ version we are building for.
 SET (CMAKE_CXX_STANDARD 11)
 
