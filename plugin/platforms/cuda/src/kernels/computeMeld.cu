@@ -1465,6 +1465,7 @@ extern "C" __global__ void applyEmapRest(unsigned long long * __restrict__ force
                 atomicAdd(&force[index1], static_cast<unsigned long long>((long long) (f.x*0x100000000)));
                 atomicAdd(&force[index1  + PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.y*0x100000000)));
                 atomicAdd(&force[index1 + 2 * PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (f.z*0x100000000)));
+                // printf("f_xyz: %d %f, %f, %f \n", index1, f.x, f.y, f.z);
             }
         }
     }

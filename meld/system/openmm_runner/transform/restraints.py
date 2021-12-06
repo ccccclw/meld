@@ -810,7 +810,6 @@ def _add_meld_restraint(rest, meld_force, alpha, timestep):
 
     return rest_index
 
-
 def _update_meld_restraint(
     rest,
     meld_force,
