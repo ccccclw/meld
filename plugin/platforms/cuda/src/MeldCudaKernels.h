@@ -262,6 +262,7 @@ private:
     /**
      * Arrays for GridPot restraints
      */   
+<<<<<<< HEAD
     // OpenMM::CudaArray* gridPotentialRestAtomIndices;
     // std::vector<int> h_gridPotentialRestAtomIndices;
     
@@ -275,6 +276,8 @@ private:
 
     // OpenMM::CudaArray* gridPotentialRestGlobalIndices;
     // std::vector<int> h_gridPotentialRestGlobalIndices;   
+=======
+>>>>>>> origin/master
     OpenMM::CudaArray* gridPotentialRestGridPos;
     std::vector<float3> h_gridPotentialRestGridPos;
 
