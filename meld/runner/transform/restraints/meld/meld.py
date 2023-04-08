@@ -85,21 +85,21 @@ class MeldRestraintTransformer(transform.TransformerBase):
             # If we have any density maps, add them now
             for index,density in enumerate(self.density_manager.densities):
                 self.tracker.add_density(index, density,0)
-                blurred = _compute_density_potential(density.density_data,density.blur_scaler(0))#,origin=False)
+                blurred = _compute_density_potential(density.density_data,density.blur_scaler(0))
 
                 # TODO What do do outside of grid?
                 # TODO fix numpy typemaps
                 meld_force.addGridPotential(
                     blurred,
-                    density.origin[0],
-                    density.origin[1],
-                    density.origin[2],
-                    density.voxel_size[0],
-                    density.voxel_size[1],
-                    density.voxel_size[2],
-                    density.nx,
-                    density.ny,
-                    density.nz,
+                    density.origin[0][0],
+                    density.origin[0][1],
+                    density.origin[0][2],
+                    density.voxel_size[0][0],
+                    density.voxel_size[0][1],
+                    density.voxel_size[0][2],
+                    density.nx[0],
+                    density.ny[0],
+                    density.nz[0],
                     index
                 )
 
@@ -175,15 +175,15 @@ class MeldRestraintTransformer(transform.TransformerBase):
             blurred = _compute_density_potential(density.density_data,alpha)
             self.force.modifyGridPotential(index, 
                                            blurred, 
-                                           density.origin[0],
-                                           density.origin[1],
-                                           density.origin[2],
-                                           density.voxel_size[0],
-                                           density.voxel_size[1],
-                                           density.voxel_size[2],
-                                           density.nx,
-                                           density.ny,
-                                           density.nz)
+                                           density.origin[0][0],
+                                           density.origin[0][1],
+                                           density.origin[0][2],
+                                           density.voxel_size[0][0],
+                                           density.voxel_size[0][1],
+                                           density.voxel_size[0][2],
+                                           density.nx[0],
+                                           density.ny[0],
+                                           density.nz[0])
 
     def _update_groups_collections(
         self,
@@ -327,13 +327,26 @@ class MeldRestraintTransformer(transform.TransformerBase):
                 )
             elif category == "density":
                 density_rest = self.tracker.density_restraints[index]
+                replica_num=int(alpha*(len(density_rest.mu)-1))
                 self.force.modifyGridPotentialRestraint(
                     index,
-                    density_rest.atom_index,
-                    _compute_density_potential(density_rest.mu,alpha),
-                    np.linspace(density_rest.map_origin[0],density_rest.map_origin[0]+(density_rest.map_dimension[0]-1)*density_rest.map_gridLength[0],int(density_rest.map_dimension[0])),
-                    np.linspace(density_rest.map_origin[1],density_rest.map_origin[1]+(density_rest.map_dimension[1]-1)*density_rest.map_gridLength[1],int(density_rest.map_dimension[1])),
-                    np.linspace(density_rest.map_origin[2],density_rest.map_origin[2]+(density_rest.map_dimension[2]-1)*density_rest.map_gridLength[2],int(density_rest.map_dimension[2]))
+                    density_rest.atom_index, 
+                    density_rest.mu[replica_num].astype(np.float64),
+                    np.linspace(density_rest.map_origin[replica_num][0],
+                                density_rest.map_origin[replica_num][0]
+                                +(density_rest.map_dimension[0][replica_num]-1)
+                                *density_rest.map_gridLength[replica_num][0],
+                                int(density_rest.map_dimension[0][replica_num])),
+                    np.linspace(density_rest.map_origin[replica_num][1],
+                                density_rest.map_origin[replica_num][1]
+                                +(density_rest.map_dimension[1][replica_num]-1)
+                                *density_rest.map_gridLength[replica_num][1],
+                                int(density_rest.map_dimension[1][replica_num])),
+                    np.linspace(density_rest.map_origin[replica_num][2],
+                                density_rest.map_origin[replica_num][2]
+                                +(density_rest.map_dimension[2][replica_num]-1)
+                                *density_rest.map_gridLength[replica_num][2]
+                                ,int(density_rest.map_dimension[2][replica_num]))
                 )
                 
             else:
@@ -484,13 +497,25 @@ class MeldRestraintTransformer(transform.TransformerBase):
             self.tracker.add_gmm_distance_restraint(rest, alpha, timestep, state)
 
         elif isinstance(rest, restraints.DensityRestraint):
+            replica_num=int(alpha*(len(rest.mu)-1))
             rest_index = meld_force.addGridPotentialRestraint(
                 rest.atom_index, 
-                _compute_density_potential(rest.mu,alpha),
-                np.linspace(rest.map_origin[0],rest.map_origin[0]+(rest.map_dimension[0]-1)*rest.map_gridLength[0],int(rest.map_dimension[0])),
-                np.linspace(rest.map_origin[1],rest.map_origin[1]+(rest.map_dimension[1]-1)*rest.map_gridLength[1],int(rest.map_dimension[1])),
-                np.linspace(rest.map_origin[2],rest.map_origin[2]+(rest.map_dimension[2]-1)*rest.map_gridLength[2],int(rest.map_dimension[2]))
-        
+                rest.mu[replica_num].astype(np.float64),
+                np.linspace(rest.map_origin[replica_num][0],
+                            rest.map_origin[replica_num][0]
+                            +(rest.map_dimension[0][replica_num]-1)
+                            *rest.map_gridLength[replica_num][0],
+                            int(rest.map_dimension[0][replica_num])),
+                np.linspace(rest.map_origin[replica_num][1],
+                            rest.map_origin[replica_num][1]
+                            +(rest.map_dimension[1][replica_num]-1)
+                            *rest.map_gridLength[replica_num][1],
+                            int(rest.map_dimension[1][replica_num])),
+                np.linspace(rest.map_origin[replica_num][2],
+                            rest.map_origin[replica_num][2]
+                            +(rest.map_dimension[2][replica_num]-1)
+                            *rest.map_gridLength[replica_num][2],
+                            int(rest.map_dimension[2][replica_num]))
             )
             self.tracker.add_density_restraint(rest, alpha, timestep, state)      
 
@@ -522,6 +547,6 @@ def _setup_precisions(
 
 
 def _compute_density_potential(mu,alpha):
-    replica_num=int(alpha*(mu.shape[0]-1))
+    replica_num=int(alpha*(len(mu)-1))
     potential=mu[replica_num].astype(np.float64)
     return potential
