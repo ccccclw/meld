@@ -678,7 +678,6 @@ extern "C" __global__ void computeGMMRest(
         }
         __syncthreads();
 
-
         float minsum = 9e99;
 
         // compute my probability
@@ -800,6 +799,8 @@ extern "C" __global__ void computeGridPotentialRest(
             energies[globalIndex] = 0;
             __syncthreads();
         }
+        int size = sizeof(grid_x);
+        // printf("xyz_size: %f,%f, %d", sizeof(grid_x), sizeof(grid_x[0]), size);
         // calculate force for each atom in all atom sets
         for (int index=blockIdx.x*blockDim.x+threadIdx.x; index<numEmapAtoms; index+=blockDim.x*gridDim.x) {
             int index_global;
@@ -839,6 +840,11 @@ extern "C" __global__ void computeGridPotentialRest(
             float f_x = 0;
             float f_y = 0;
             float f_z = 0;
+            // printf("xyz_origin: %f,%f,%f \n", grid_x[0],grid_y[0],grid_z[0]);
+            // printf("xyz_gap: %f,%f,%f \n", grid_x[0],grid_x[-1],(grid_x[-1]-grid_x[0])/(grid_x[1]-grid_x[0]));
+            // printf("xyz_size: %d,%d,%f \n", sizeof(grid_x),sizeof(grid_y)/sizeof(grid_y[0]),sizeof(grid_z)/sizeof(grid_z[0]));
+            // printf("grid_xyzmax: %d,%d,%d \n", grid_xmax,grid_ymax,grid_zmax);
+            // printf("voxel_size_xyz: %f,%f,%f \n", grid_x[1]-grid_x[0],grid_y[1]-grid_y[0],grid_z[1]-grid_z[0]);
             // linear interpolation
             // get potential at 8 grids around the atom
             float v_000 = mu[mu_num*mu_index+(grid_znum-1) * grid_ymax * grid_xmax + (grid_ynum-1) * grid_xmax + grid_xnum -1];
@@ -878,7 +884,6 @@ extern "C" __global__ void computeGridPotentialRest(
         }
 
 }
-
 
 
 extern "C" __global__ void evaluateAndActivate(

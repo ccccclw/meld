@@ -949,8 +949,9 @@ void CudaCalcMeldForceKernel::setupGridPotentialRestraints(const MeldForce &forc
     {
         int global_index;
         std::vector<int> atom;
-        std::vector<double> mu,gridpos_x, gridpos_y, gridpos_z;
+        std::vector<double> mu, gridpos_x, gridpos_y, gridpos_z;
         force.getGridPotentialRestraintParams(i, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
+        numGridPotentialGrids = make_int3(gridpos_x.size(), gridpos_y.size(), gridpos_z.size());
         for (int d = 0; d < gridpos_x.size(); ++d) {
             h_gridPotentialRestGridPosx[d] = gridpos_x[d];
         }
@@ -1048,14 +1049,17 @@ int3 CudaCalcMeldForceKernel::calcNumGrids(const MeldForce &force)
     int x_size = 1;
     int y_size = 1;
     int z_size = 1;
+
     if (numGridPotentialRestraints > 0) {
         force.getGridPotentialRestraintParams(0, atom, mu, gridpos_x, gridpos_y, gridpos_z, global_index);
         x_size = gridpos_x.size();
         y_size = gridpos_y.size();
         z_size = gridpos_z.size();
     }
+
     return make_int3(x_size,y_size,z_size);
 }
+
 int CudaCalcMeldForceKernel::calcNumGridPotentialAtoms(const MeldForce &force)
 {
     int total = 0;

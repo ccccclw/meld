@@ -35,14 +35,20 @@ class DensityManager:
         origin = []
         voxel_size = []
         if type(filename) is list:
+            assert len(filename) == blur_scaler._num_replicas, "Number of density files must match number of replicas."
             for density_file in filename:
                 density_data.append(mrcfile.open(density_file).data)
                 origin.append(list(mrcfile.open(density_file).header["origin"].item()) * u.angstrom)
                 voxel_size.append(list(mrcfile.open(density_file).voxel_size.item()) * u.angstrom)
+            assert density_data[0].shape[0] >= max([density_data[i].shape[0] for i in range(1,len(density_data))]) and \
+                   density_data[0].shape[1] >= max([density_data[i].shape[1] for i in range(1,len(density_data))]) and \
+                   density_data[0].shape[2] >= max([density_data[i].shape[2] for i in range(1,len(density_data))]),\
+                   "The first density file must have the largest dimensions (for now...)."
+
         else:
             density_data = [mrcfile.open(filename).data]
-            origin = [list(mrcfile.open(filename).header["origin"].item())] * blur_scaler._num_replicas * u.angstrom
-            voxel_size = [list(mrcfile.open(filename).voxel_size.item())] * blur_scaler._num_replicas * u.angstrom
+            origin = [list(mrcfile.open(filename).header["origin"].item()) * u.angstrom] * blur_scaler._num_replicas
+            voxel_size = [list(mrcfile.open(filename).voxel_size.item()) * u.angstrom] * blur_scaler._num_replicas 
         
         density = DensityMap(density_data, origin, voxel_size, blur_scaler, scale_factor, threshold)
         self.densities.append(density)
@@ -61,16 +67,13 @@ class DensityMap:
     ):  
         self.scale_factor = scale_factor
         self.threshold = threshold
-        self.nx = [density.shape[2] for density in density_data] if len(density_data) > 1 else [density_data[0].shape[2]] * blur_scaler._num_replicas
-        self.ny = [density.shape[1] for density in density_data] if len(density_data) > 1 else [density_data[0].shape[1]] * blur_scaler._num_replicas
-        self.nz = [density.shape[0] for density in density_data] if len(density_data) > 1 else [density_data[0].shape[0]] * blur_scaler._num_replicas
         self.blur_scaler = blur_scaler
 
         if len(density_data) > 1:
             self.nx = [density.shape[2] for density in density_data]
             self.ny = [density.shape[1] for density in density_data]
             self.nz = [density.shape[0] for density in density_data]
-            self.density_data = [self.map_potential(density_data[index], threshold[index], scale_factor[index]) for index in range(len(density_data))]
+            self.density_data = [np.matrix.flatten(self.map_potential(density_data[index], threshold[index], scale_factor[index])).astype(np.float64) for index in range(len(density_data))]
         else:
             self.nx = [density_data[0].shape[2]] * blur_scaler._num_replicas
             self.ny = [density_data[0].shape[1]] * blur_scaler._num_replicas
@@ -88,9 +91,9 @@ class DensityMap:
                     density_data.append(tmp_pot.astype(np.float64))
                 self.density_data = density_data
     
-        self.origin = np.array(origin.value_in_unit(u.nanometer))
-        self.voxel_size = np.array(voxel_size.value_in_unit(u.nanometer))
-    
+        self.origin = np.array([o.value_in_unit(u.nanometer) for o in origin])
+        self.voxel_size = np.array([v.value_in_unit(u.nanometer) for v in voxel_size])
+
     def map_potential(self, map, threshold, scale_factor):
         map_cp = copy.deepcopy(map)
         map = scale_factor * ((map - threshold) / (map.max() - threshold))
